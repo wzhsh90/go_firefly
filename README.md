@@ -67,7 +67,8 @@ Mysql: 5.6+
 
 ```bash
 git clone https://github.com/wzhsh90/go_firefly.git
-cd rust_firefly
+cd go_firefly
+go run main.go
 ```
 
 #### 示例sql数据表
