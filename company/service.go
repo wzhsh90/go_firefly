@@ -8,6 +8,7 @@ import (
 )
 
 var tableName = "sys_company_t"
+var listCol = []string{"id", "com_name", "com_desc"}
 
 type Service struct{}
 
@@ -44,7 +45,7 @@ func (u *Service) List(name string, pageIndex, pageSize uint) models.PageModelLa
 	if name != "" {
 		cond["com_name"] = db.Like(utils.SqlLike(name))
 	}
-	res := config.DbSession.Collection(tableName).Find(cond).Select("id", "com_name", "com_desc")
+	res := config.DbSession.Collection(tableName).Find(cond).Select(listCol)
 	p := res.Paginate(pageSize)
 	itemsCount, _ := p.Count()
 
@@ -64,7 +65,7 @@ func (u *Service) List2(name string, pageIndex, pageSize uint) models.PageModelL
 	}
 	itemsCount, _ := config.DbSession.Collection(tableName).Find(cond).Count()
 
-	p := config.DbSession.SQL().SelectFrom(tableName).Columns("id", "com_name", "com_desc").Where(cond).Paginate(pageSize)
+	p := config.DbSession.SQL().SelectFrom(tableName).Columns(listCol).Where(cond).Paginate(pageSize)
 	var list []models.Company
 	p.Page(pageIndex).All(&list)
 
@@ -73,6 +74,7 @@ func (u *Service) List2(name string, pageIndex, pageSize uint) models.PageModelL
 	tableJsonData.Rows = list
 	return tableJsonData
 }
+
 func (u *Service) ListSql() {
 	rows, _ := config.DbSession.SQL().Query(`SELECT * FROM accounts WHERE last_name = ?`, "Smith")
 	var companies []models.Company
@@ -85,6 +87,9 @@ func (u *Service) Update(arg models.Company) error {
 	return config.DbSession.Collection(tableName).Find("id=?", arg.Id).Update(&arg)
 }
 func (u *Service) Del(id string) (int64, error) {
+
+	//1、config.DbSession.Delete(&models.Company{Id: arg.Id})
+	//2、config.DbSession.Collection(tableName).Find("id=?", id).Delete()
 
 	ret, err := config.DbSession.SQL().DeleteFrom(tableName).Where("id=?", id).Exec()
 	if err != nil {
