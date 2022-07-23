@@ -100,6 +100,7 @@ func (u *Service) Del(id string) (int64, error) {
 }
 func (u *Service) Get(id string) models.Company {
 	var entity models.Company
-	config.DbSession.Get(&entity, db.Cond{"id": id})
+	config.DbSession.Collection(tableName).Find("id", id).One(&entity)
+	//config.DbSession.Get(&entity, db.Cond{"id": id})
 	return entity
 }
