@@ -63,10 +63,11 @@ func (u *Service) List2(name string, pageIndex, pageSize uint) models.PageModelL
 		cond["com_name"] = db.Like(utils.SqlLike(name))
 	}
 	itemsCount, _ := config.DbSession.Collection(tableName).Find(cond).Count()
+
 	p := config.DbSession.SQL().SelectFrom(tableName).Columns("id", "com_name", "com_desc").Where(cond).Paginate(pageSize)
-	p.TotalEntries()
 	var list []models.Company
 	p.Page(pageIndex).All(&list)
+
 	var tableJsonData = models.PageModelLay{}
 	tableJsonData.BuildPageInfo(pageIndex, pageSize, uint(itemsCount))
 	tableJsonData.Rows = list
