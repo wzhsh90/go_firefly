@@ -4,52 +4,94 @@ import (
 	"firefly/config"
 	models "firefly/model"
 	"firefly/utils"
+	"github.com/upper/db/v4"
 )
 
-type mapper struct {
-	ListCount      func(name string) (int64, error)                                       `args:"name"`
-	List           func(name string, pageIndex, pageSize int64) ([]models.Company, error) `args:"name,pageIndex,pageSize"`
-	ExistName      func(name string) (int64, error)                                       `args:"name"`
-	InsertTemplete func(arg models.Company) (int64, error)
-	Update         func(arg models.Company) (int64, error)
-	Del            func(id string) (int64, error)          `args:"id"`
-	Get            func(id string) (models.Company, error) `args:"id"`
+var tableName = "sys_company_t"
+
+type Service struct{}
+
+func (u *Service) ExistName(name string) (bool, error) {
+
+	return config.DbSession.Collection(tableName).Find("com_name=?", name).Exists()
+}
+func (u *Service) Save(arg models.Company) error {
+	ret, err := config.DbSession.SQL().InsertInto(tableName).Values(arg).Exec()
+	if err != nil {
+		return err
+	} else {
+		_, rerr := ret.RowsAffected()
+		return rerr
+	}
+
+	//return config.DbSession.Save(&arg)
+}
+func (u *Service) BatchSave(arg []models.Company) {
+	batcher := config.DbSession.SQL().InsertInto(tableName).Batch(400)
+	go func() {
+		defer batcher.Done()
+		for i := range arg {
+			batcher.Values(arg[i])
+		}
+	}()
+	batcher.Wait()
+
 }
 
-var dao mapper
+func (u *Service) List(name string, pageIndex, pageSize uint) models.PageModelLay {
 
-func init() {
-	config.RegisterMapper("resource/mybatis/CompanyMapper.xml", &dao)
-}
-
-type Service struct {
-	dao *mapper
-}
-
-func (u *Service) ExistName(name string) (int64, error) {
-	return dao.ExistName(name)
-}
-func (u *Service) InsertTemplete(arg *models.Company) (int64, error) {
-	return dao.InsertTemplete(*arg)
-}
-
-func (u *Service) List(name string, pageIndex, pageSize int64) models.PageModelLay {
+	cond := db.Cond{}
+	if name != "" {
+		cond["com_name"] = db.Like(utils.SqlLike(name))
+	}
+	res := config.DbSession.Collection(tableName).Find(cond).Select("id", "com_name", "com_desc")
+	p := res.Paginate(pageSize)
+	var list []models.Company
+	p.Page(pageIndex).All(&list)
 	var tableJsonData = models.PageModelLay{}
-	var realName = utils.SqlLike(name)
-	itemsCount, _ := dao.ListCount(realName)
-	tableJsonData.BuildPageInfo(pageIndex, pageSize, itemsCount)
-	list, _ := dao.List(realName, tableJsonData.PageIndex, tableJsonData.PageSize)
-
+	itemsCount, _ := p.Count()
+	tableJsonData.BuildPageInfo(pageIndex, pageSize, uint(itemsCount))
 	tableJsonData.Rows = list
 	return tableJsonData
 }
-func (u *Service) Update(arg *models.Company) (int64, error) {
+func (u *Service) List2(name string, pageIndex, pageSize uint) models.PageModelLay {
 
-	return dao.Update(*arg)
+	cond := db.Cond{}
+	if name != "" {
+		cond["com_name"] = db.Like(utils.SqlLike(name))
+	}
+	itemsCount, _ := config.DbSession.Collection(tableName).Find(cond).Count()
+	p := config.DbSession.SQL().SelectFrom(tableName).Columns("id", "com_name", "com_desc").Where(cond).Paginate(pageSize)
+	p.TotalEntries()
+	var list []models.Company
+	p.Page(pageIndex).All(&list)
+	var tableJsonData = models.PageModelLay{}
+	tableJsonData.BuildPageInfo(pageIndex, pageSize, uint(itemsCount))
+	tableJsonData.Rows = list
+	return tableJsonData
+}
+func (u *Service) ListSql() {
+	rows, _ := config.DbSession.SQL().Query(`SELECT * FROM accounts WHERE last_name = ?`, "Smith")
+	var companies []models.Company
+	iter := config.DbSession.SQL().NewIterator(rows)
+	_ = iter.All(&companies)
+
+}
+func (u *Service) Update(arg models.Company) error {
+
+	return config.DbSession.Collection(tableName).Find("id=?", arg.Id).Update(&arg)
 }
 func (u *Service) Del(id string) (int64, error) {
-	return dao.Del(id)
+
+	ret, err := config.DbSession.SQL().DeleteFrom(tableName).Where("id=?", id).Exec()
+	if err != nil {
+		return 0, err
+	} else {
+		return ret.RowsAffected()
+	}
 }
-func (u *Service) Get(id string) (models.Company, error) {
-	return dao.Get(id)
+func (u *Service) Get(id string) models.Company {
+	var entity models.Company
+	config.DbSession.Get(&entity, db.Cond{"id": id})
+	return entity
 }

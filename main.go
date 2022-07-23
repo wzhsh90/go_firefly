@@ -7,6 +7,7 @@ import (
 )
 
 func main() {
+	defer config.CloseDb()
 	bootConfig := config.GetAppConfig()
 	gin.SetMode(bootConfig.Server.Mode)
 	r := gin.Default()

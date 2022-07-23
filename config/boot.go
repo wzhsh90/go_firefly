@@ -21,7 +21,11 @@ type Server struct {
 }
 type DataSource struct {
 	Dialect   string
-	Url       string
+	User      string
+	Password  string
+	Database  string
+	Host      string
+	Socket    string
 	MaxLife   int
 	MaxIdle   int
 	MaxOpen   int
@@ -51,8 +55,6 @@ func init() {
 	} else {
 		log.Print("当前无数据配置")
 	}
-	d, _ := yaml.Marshal(&bootConfig)
-	ZapAppLogger.Sugar().Infow("配置文件", "yml", string(d))
 }
 func GetAppConfig() BootConfig {
 

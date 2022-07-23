@@ -1,30 +1,37 @@
 package config
 
 import (
-	"github.com/zhuxiujia/GoMybatis"
-	"io/ioutil"
+	"github.com/upper/db/v4"
+	"github.com/upper/db/v4/adapter/mysql"
 	"time"
 )
 
-type DbEngine struct {
-	Engine *GoMybatis.GoMybatisEngine
-}
-
-var AppDbEngine DbEngine
+var DbSession db.Session
 
 func initFromConfig(dbConfig DataSource) {
-	myBatisEngine := GoMybatis.GoMybatisEngine{}.New()
-	myBatisEngine.SetLogEnable(dbConfig.LogEnable)
-	db, err := myBatisEngine.Open(dbConfig.Dialect, dbConfig.Url)
+	var settings = mysql.ConnectionURL{
+		User:     dbConfig.User,
+		Password: dbConfig.Password,
+		Database: dbConfig.Database,
+		Host:     dbConfig.Host,
+		Socket:   dbConfig.Socket,
+		Options: map[string]string{
+			"charset":   "utf8mb4",
+			"parseTime": "true",
+			"loc":       "Local",
+		},
+	}
+	db.DefaultSettings.SetConnMaxLifetime(time.Duration(dbConfig.MaxLife) * time.Second)
+	db.DefaultSettings.SetMaxIdleConns(dbConfig.MaxIdle)
+	db.DefaultSettings.SetMaxOpenConns(dbConfig.MaxOpen)
+	db.LC().SetLevel(db.LogLevelTrace)
+	sess, err := mysql.Open(settings)
 	if err != nil {
 		panic(err)
 	}
-	db.SetConnMaxLifetime(time.Duration(dbConfig.MaxLife) * time.Second)
-	db.SetMaxIdleConns(dbConfig.MaxIdle)
-	db.SetMaxOpenConns(dbConfig.MaxOpen)
-	AppDbEngine = DbEngine{Engine: &myBatisEngine}
+	DbSession = sess
+
 }
-func RegisterMapper(mapperPath string, daoPtr interface{}) {
-	xmlBytes, _ := ioutil.ReadFile(mapperPath)
-	AppDbEngine.Engine.WriteMapperPtr(daoPtr, xmlBytes)
+func CloseDb() {
+	DbSession.Close()
 }

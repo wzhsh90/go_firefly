@@ -5,7 +5,6 @@ import (
 	models "firefly/model"
 	"firefly/utils"
 	"github.com/gin-gonic/gin"
-	"strconv"
 )
 
 type CompanyController struct {
@@ -13,8 +12,8 @@ type CompanyController struct {
 
 func (c *CompanyController) List(ctx *gin.Context) {
 	name := ctx.PostForm("name")
-	pageIndex, _ := strconv.ParseInt(ctx.PostForm("pageIndex"), 10, 64)
-	pageSize, _ := strconv.ParseInt(ctx.PostForm("pageSize"), 10, 64)
+	pageIndex := utils.ParseUnInt(ctx.PostForm("pageIndex"))
+	pageSize := utils.ParseUnInt(ctx.PostForm("pageSize"))
 	svr := company.Service{}
 	tableJson := svr.List(name, pageIndex, pageSize)
 	ctx.JSON(200, tableJson)
@@ -31,7 +30,7 @@ func (c *CompanyController) Add(ctx *gin.Context) {
 	comDesc := ctx.PostForm("com_desc")
 	svr := company.Service{}
 	existFlag, _ := svr.ExistName(comeName)
-	if existFlag >= 1 {
+	if existFlag {
 		rest.Message = "当前公司名称已经存在"
 		ctx.JSON(200, rest)
 		return
@@ -41,8 +40,8 @@ func (c *CompanyController) Add(ctx *gin.Context) {
 		ComName: comeName,
 		Id:      utils.NewId(),
 	}
-	db, _ := svr.InsertTemplete(&dbm)
-	if db == 1 {
+	serr := svr.Save(dbm)
+	if serr == nil {
 		rest.Code = 0
 		rest.Message = "添加成功"
 	} else {
@@ -61,15 +60,10 @@ func (c *CompanyController) Update(ctx *gin.Context) {
 	}
 	comDesc := ctx.PostForm("com_desc")
 	svr := company.Service{}
-	org, oerr := svr.Get(ctx.PostForm("id"))
-	if oerr != nil {
-		rest.Message = "当前数据不存在"
-		ctx.JSON(200, rest)
-		return
-	}
+	org := svr.Get(ctx.PostForm("id"))
 	if org.ComName != comeName {
 		existFlag, _ := svr.ExistName(comeName)
-		if existFlag >= 1 {
+		if existFlag {
 			rest.Message = "当前公司名称已经存在"
 			ctx.JSON(200, rest)
 			return
@@ -80,7 +74,7 @@ func (c *CompanyController) Update(ctx *gin.Context) {
 		ComName: comeName,
 		Id:      ctx.PostForm("id"),
 	}
-	if _, err := svr.Update(&dbm); err == nil {
+	if err := svr.Update(dbm); err == nil {
 		rest.Code = 0
 		rest.Message = "修改成功"
 	} else {

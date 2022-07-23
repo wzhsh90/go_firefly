@@ -4,7 +4,6 @@ import (
 	"firefly/middleware"
 	models "firefly/model"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 type LoginController struct {
@@ -43,7 +42,7 @@ func (c *LoginController) Logoff(ctx *gin.Context) {
 	ctx.JSON(200, rest)
 }
 func (c *LoginController) Home(ctx *gin.Context) {
-	ctx.HTML(http.StatusOK, "home.html", gin.H{
+	ctx.HTML(200, "home.html", gin.H{
 		"title": "首页",
 	})
 }
