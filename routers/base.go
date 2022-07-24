@@ -10,7 +10,7 @@ import (
 
 func init() {
 	_ = event.Subscribe(consts.ROUTER_INIT_EVENT, func(r *gin.Engine) {
-		ctl := controller.CompanyController{}
+		ctl := controller.BaseController{}
 		v1 := r.Group("/company")
 		{
 			v1.POST("/list", ctl.List)

@@ -1,0 +1,19 @@
+{
+  "exits": {
+    "columns": [
+      "com_name"
+    ],
+    "tip": "当前公司名称已经存在"
+  },
+  "columns": {
+    "com_name": {
+      "zh_name": "公司名称",
+      "dom": "input",
+      "rule": "required"
+    },
+    "com_desc": {
+      "zh_name": "备注",
+      "dom": "input"
+    }
+  }
+}

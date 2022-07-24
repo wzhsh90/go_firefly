@@ -2,7 +2,6 @@ package routers
 
 import (
 	"encoding/gob"
-	"firefly/config"
 	"firefly/consts"
 	"firefly/event"
 	"firefly/middleware"
@@ -48,7 +47,7 @@ func AuthMiddleWare() gin.HandlerFunc {
 
 	}
 }
-func InitRouter(r *gin.Engine, server config.Server) {
+func InitRouter(r *gin.Engine, server models.Server) {
 	gob.Register(&models.LoginUser{})
 	r.MaxMultipartMemory = 100 << 20 //100M
 	r.Use(middleware.Session())

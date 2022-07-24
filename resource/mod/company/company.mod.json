@@ -1,0 +1,25 @@
+{
+  "name": "company",
+  "table": {
+    "name": "sys_company_t",
+    "zh_name": "公司信息"
+  },
+  "columns": {
+    "id": {
+      "zh_name": "Id",
+      "db_type": "varchar(24)",
+      "lang_type": "string",
+      "key": true
+    },
+    "com_name": {
+      "zh_name": "公司名称",
+      "db_type": "varchar(100)",
+      "lang_type": "string"
+    },
+    "com_desc": {
+      "zh_name": "备注",
+      "db_type": "varchar(100)",
+      "lang_type": "string"
+    }
+  }
+}

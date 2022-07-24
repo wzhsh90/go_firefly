@@ -11,7 +11,9 @@ require (
 	github.com/gin-contrib/sessions v0.0.3
 	github.com/gin-gonic/gin v1.8.1
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
+	github.com/go-playground/validator/v10 v10.10.0
 	github.com/go-sql-driver/mysql v1.6.0
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/upper/db/v4 v4.5.4
 	go.uber.org/zap v1.13.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
