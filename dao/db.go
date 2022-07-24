@@ -1,4 +1,4 @@
-package db
+package dao
 
 import (
 	models "firefly/model"
@@ -48,6 +48,36 @@ func Save(table string, entity map[string]interface{}) (int64, error) {
 		return ret.RowsAffected()
 	}
 }
+func Page(table string, cond db.Cond, listCol []string, pageIndex, pageSize uint) models.PageModelLay {
+	cols := make([]interface{}, 0)
+	for _, v := range listCol {
+		cols = append(cols, v)
+	}
+	res := session.Collection(table).Find(cond).Select(cols...)
+	p := res.Paginate(pageSize)
+	itemsCount, _ := p.Count()
+	list := make([]map[string]interface{}, 0)
+	perr := p.Page(pageIndex).All(&list)
+	if perr != nil {
+		println(perr.Error())
+	}
+	var tableJsonData = models.PageModelLay{}
+	pages, _ := p.TotalPages()
+	tableJsonData.Pages = pages
+	tableJsonData.Page = pageIndex
+	tableJsonData.PageSize = pageSize
+	tableJsonData.Records = uint(itemsCount)
+	tableJsonData.Rows = list
+	return tableJsonData
+}
+
+func Count(table string, query map[string]interface{}) (uint64, error) {
+	cond := db.Cond{}
+	for k, v := range query {
+		cond[k] = v
+	}
+	return session.Collection(table).Find(cond).Count()
+}
 func Del(table string, query map[string]interface{}) (int64, error) {
 	ret, err := session.SQL().DeleteFrom(table).Where(query).Exec()
 	if err != nil {
@@ -55,6 +85,15 @@ func Del(table string, query map[string]interface{}) (int64, error) {
 	} else {
 		return ret.RowsAffected()
 	}
+}
+func Get(table string, query map[string]interface{}) map[string]interface{} {
+	cond := db.Cond{}
+	for k, v := range query {
+		cond[k] = v
+	}
+	info := make(map[string]interface{})
+	session.Collection(table).Find(cond).One(&info)
+	return info
 }
 func Update(table string, query map[string]interface{}, updateItem map[string]interface{}) (int64, error) {
 	cond := db.Cond{}

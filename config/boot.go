@@ -1,7 +1,7 @@
 package config
 
 import (
-	"firefly/db"
+	"firefly/dao"
 	models "firefly/model"
 	"flag"
 	_ "github.com/go-sql-driver/mysql"
@@ -29,7 +29,7 @@ func init() {
 	//把yaml形式的字符串解析成struct类型
 	_ = yaml.Unmarshal(data, &bootConfig)
 	if bootConfig.Db.Dialect != "" {
-		db.InitFromConfig(bootConfig.Db)
+		dao.InitFromConfig(bootConfig.Db)
 	} else {
 		log.Print("当前无数据配置")
 	}

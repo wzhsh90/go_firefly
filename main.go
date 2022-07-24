@@ -2,13 +2,13 @@ package main
 
 import (
 	"firefly/config"
-	"firefly/db"
+	"firefly/dao"
 	"firefly/routers"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	defer db.CloseDb()
+	defer dao.CloseDb()
 	bootConfig := config.GetAppConfig()
 	gin.SetMode(bootConfig.Server.Mode)
 	r := gin.Default()
