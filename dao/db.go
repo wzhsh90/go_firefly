@@ -81,7 +81,11 @@ func Count(table string, query map[string]interface{}) (uint64, error) {
 	return session.Collection(table).Find(cond).Count()
 }
 func Del(table string, query map[string]interface{}) (int64, error) {
-	ret, err := session.SQL().DeleteFrom(table).Where(query).Exec()
+	cond := db.Cond{}
+	for k, v := range query {
+		cond[k] = v
+	}
+	ret, err := session.SQL().DeleteFrom(table).Where(cond).Exec()
 	if err != nil {
 		return 0, err
 	} else {
