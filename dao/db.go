@@ -88,6 +88,20 @@ func Del(table string, query map[string]interface{}) (int64, error) {
 		return ret.RowsAffected()
 	}
 }
+func GetCol(table string, query map[string]interface{}, listCol []string) map[string]string {
+
+	cond := db.Cond{}
+	for k, v := range query {
+		cond[k] = v
+	}
+	cols := make([]interface{}, 0)
+	for _, v := range listCol {
+		cols = append(cols, v)
+	}
+	info := make(map[string]string)
+	session.Collection(table).Find(cond).Select(cols...).One(&info)
+	return info
+}
 func Get(table string, query map[string]interface{}) map[string]string {
 	cond := db.Cond{}
 	for k, v := range query {

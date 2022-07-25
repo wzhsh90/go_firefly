@@ -180,7 +180,7 @@ func (c *BaseController) Update(ctx *gin.Context) {
 		//删除修改主键数据,不允许修改主键
 		delete(formData, k)
 	}
-	orgInfo := dao.Get(entity.Table.Name, queryMap)
+	orgInfo := dao.GetCol(entity.Table.Name, queryMap, listCol)
 	if len(orgInfo) == 0 {
 		rest.Message = "获取历史数据失败或已不存在"
 		ctx.JSON(200, rest)

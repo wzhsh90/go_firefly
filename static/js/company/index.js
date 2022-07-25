@@ -39,6 +39,7 @@ layui.use(['table'], function () {
 
 function ajaxUpdate(data) {
     var url = "/company/update";
+    data["flag"]=1
     postAjax(url, data, function (res) {
         if (res["code"] == 0) {
             layer.msg(res["msg"]);

@@ -18,6 +18,10 @@
     "com_desc": {
       "zh_name": "备注",
       "dom": "input"
+    },
+    "flag": {
+      "zh_name": "启用标记",
+      "dom": "input"
     }
   }
 }

@@ -20,6 +20,11 @@
       "zh_name": "备注",
       "db_type": "varchar(100)",
       "lang_type": "string"
+    },
+    "flag": {
+      "zh_name": "启用标记",
+      "db_type": "tinyint(1)",
+      "lang_type": "int"
     }
   }
 }
