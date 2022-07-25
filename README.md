@@ -74,14 +74,13 @@ go run main.go
 #### 示例sql数据表
 
 ```sql
-CREATE TABLE `sys_company_t`
-(
-    `id`       char(24) NOT NULL,
-    `com_name` varchar(100) DEFAULT NULL,
-    `com_desc` varchar(100) DEFAULT NULL,
-    PRIMARY KEY (`id`)
+CREATE TABLE `sys_company_t` (
+                                 `id` char(24) NOT NULL,
+                                 `com_name` varchar(100) DEFAULT NULL,
+                                 `com_desc` varchar(100) DEFAULT NULL,
+                                 `flag` tinyint(1) DEFAULT '0',
+                                 PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 
 ```
 
