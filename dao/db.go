@@ -56,7 +56,9 @@ func Page(table string, cond db.Cond, listCol []string, pageIndex, pageSize uint
 	res := session.Collection(table).Find(cond).Select(cols...)
 	p := res.Paginate(pageSize)
 	itemsCount, _ := p.Count()
-	list := make([]map[string]interface{}, 0)
+	list := make([]map[string]string, 0)
+	//var list []models.Company
+	//var list []interface{}
 	perr := p.Page(pageIndex).All(&list)
 	if perr != nil {
 		println(perr.Error())
@@ -86,12 +88,12 @@ func Del(table string, query map[string]interface{}) (int64, error) {
 		return ret.RowsAffected()
 	}
 }
-func Get(table string, query map[string]interface{}) map[string]interface{} {
+func Get(table string, query map[string]interface{}) map[string]string {
 	cond := db.Cond{}
 	for k, v := range query {
 		cond[k] = v
 	}
-	info := make(map[string]interface{})
+	info := make(map[string]string)
 	session.Collection(table).Find(cond).One(&info)
 	return info
 }
@@ -100,7 +102,7 @@ func Update(table string, query map[string]interface{}, updateItem map[string]in
 	for k, v := range query {
 		cond[k] = v
 	}
-	ret, err := session.SQL().Update(table).Set(updateItem).Where(query).Exec()
+	ret, err := session.SQL().Update(table).Set(updateItem).Where(cond).Exec()
 	if err != nil {
 		return 0, err
 	} else {

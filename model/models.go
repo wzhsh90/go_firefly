@@ -24,7 +24,6 @@ type ModInfo struct {
 	Columns map[string]ModColumn `json:"columns"`
 }
 
-//todo 这里可能有并发问题
 func (c *ModInfo) GetKeyCols() map[string]ModColumn {
 	keys := make(map[string]ModColumn)
 	for k, v := range c.Columns {

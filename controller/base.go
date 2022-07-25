@@ -14,7 +14,7 @@ import (
 var modJson = "resource/mod/company/company.mod.json"
 var addJson = "resource/mod/company/company.add.json"
 var updateJson = "resource/mod/company/company.update.json"
-var listCol = []string{"id", "com_name", "com_desc"}
+var listCol = []string{"id", "com_name", "com_desc", "flag"}
 var validate = validator.New()
 
 type BaseController struct {
@@ -193,6 +193,11 @@ func (c *BaseController) Update(ctx *gin.Context) {
 		checkFlag := false
 		for _, v := range formAdd.Exits.Columns {
 			existMap[v] = formData[v]
+			if orgInfo[v] != formData[v] {
+				checkFlag = true
+				break
+			}
+			//interface conversion: interface {} is []uint8, not string
 			if orgInfo[v] != formData[v] {
 				checkFlag = true
 				break
