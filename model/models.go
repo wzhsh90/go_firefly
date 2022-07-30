@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"firefly/utils"
+	"gopkg.in/guregu/null.v4/zero"
 	"io/ioutil"
 	"path/filepath"
 )
@@ -13,9 +14,11 @@ type LoginUser struct {
 }
 
 type Company struct {
-	Id      string `db:"id" form:"id" json:"id"`
-	ComDesc string `db:"com_desc" form:"com_desc" json:"com_desc"`
-	ComName string `db:"com_name" form:"com_name" json:"com_name"`
+	Id      zero.String `db:"id" form:"id" json:"id"`
+	ComDesc zero.String `db:"com_desc" form:"com_desc" json:"com_desc"`
+	ComName zero.String `db:"com_name" form:"com_name" json:"com_name"`
+	Flag    zero.Int    `db:"flag" form:"flag" json:"flag"`
+	Age     zero.Int    `db:"age" form:"age" json:"age"`
 }
 
 type ModInfo struct {

@@ -1,7 +1,7 @@
 package models
 
 type PageModel struct {
-	PageIndex  uint
+	PageIndex  uint        `json:"-"`
 	PageSize   uint        `json:"pageSize"`
 	Pages      uint        `json:"pages"`
 	Page       uint        `json:"page"`
@@ -9,8 +9,8 @@ type PageModel struct {
 	Data       interface{} `json:"data"`
 }
 type PageModelLay struct {
-	Code      int `json:"code"`
-	PageIndex uint
+	Code      int         `json:"code"`
+	PageIndex uint        `json:"-"`
 	PageSize  uint        `json:"pageSize"`
 	Pages     uint        `json:"pages"`
 	Page      uint        `json:"page"`

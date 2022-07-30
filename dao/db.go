@@ -56,10 +56,41 @@ func Page(table string, cond db.Cond, listCol []string, pageIndex, pageSize uint
 	res := session.Collection(table).Find(cond).Select(cols...)
 	p := res.Paginate(pageSize)
 	itemsCount, _ := p.Count()
-	list := make([]map[string]string, 0)
-	//var list []models.Company
-	//var list []interface{}
+	list := make([]map[string]interface{}, 0)
 	perr := p.Page(pageIndex).All(&list)
+	if perr != nil {
+		println(perr.Error())
+	}
+	//处理interface 问题
+	for _, row := range list {
+		for k, v := range row {
+			switch v.(type) {
+			case []uint8:
+				arr := v.([]uint8)
+				row[k] = string(arr)
+			case nil:
+				row[k] = ""
+			}
+		}
+	}
+	var tableJsonData = models.PageModelLay{}
+	pages, _ := p.TotalPages()
+	tableJsonData.Pages = pages
+	tableJsonData.Page = pageIndex
+	tableJsonData.PageSize = pageSize
+	tableJsonData.Records = uint(itemsCount)
+	tableJsonData.Rows = list
+	return tableJsonData
+}
+func PageStruct(table string, cond db.Cond, listCol []string, listPtr interface{}, pageIndex, pageSize uint) models.PageModelLay {
+	cols := make([]interface{}, 0)
+	for _, v := range listCol {
+		cols = append(cols, v)
+	}
+	res := session.Collection(table).Find(cond).Select(cols...)
+	p := res.Paginate(pageSize)
+	itemsCount, _ := p.Count()
+	perr := p.Page(pageIndex).All(listPtr)
 	if perr != nil {
 		println(perr.Error())
 	}
@@ -69,7 +100,7 @@ func Page(table string, cond db.Cond, listCol []string, pageIndex, pageSize uint
 	tableJsonData.Page = pageIndex
 	tableJsonData.PageSize = pageSize
 	tableJsonData.Records = uint(itemsCount)
-	tableJsonData.Rows = list
+	tableJsonData.Rows = listPtr
 	return tableJsonData
 }
 
@@ -92,7 +123,7 @@ func Del(table string, query map[string]interface{}) (int64, error) {
 		return ret.RowsAffected()
 	}
 }
-func GetCol(table string, query map[string]interface{}, listCol []string) map[string]string {
+func GetCol(table string, query map[string]interface{}, listCol []string) map[string]interface{} {
 
 	cond := db.Cond{}
 	for k, v := range query {
@@ -102,18 +133,57 @@ func GetCol(table string, query map[string]interface{}, listCol []string) map[st
 	for _, v := range listCol {
 		cols = append(cols, v)
 	}
-	info := make(map[string]string)
+	info := make(map[string]interface{})
 	session.Collection(table).Find(cond).Select(cols...).One(&info)
+	for k, v := range info {
+		switch v.(type) {
+		case []uint8:
+			arr := v.([]uint8)
+			info[k] = string(arr)
+		case nil:
+			info[k] = ""
+		}
+	}
 	return info
 }
-func Get(table string, query map[string]interface{}) map[string]string {
+
+func GetColStruct(table string, query map[string]interface{}, listCol []string, entityPtr interface{}) {
+
 	cond := db.Cond{}
 	for k, v := range query {
 		cond[k] = v
 	}
-	info := make(map[string]string)
+	cols := make([]interface{}, 0)
+	for _, v := range listCol {
+		cols = append(cols, v)
+	}
+	session.Collection(table).Find(cond).Select(cols...).One(entityPtr)
+}
+func Get(table string, query map[string]interface{}) map[string]interface{} {
+	cond := db.Cond{}
+	for k, v := range query {
+		cond[k] = v
+	}
+	info := make(map[string]interface{})
 	session.Collection(table).Find(cond).One(&info)
+	for k, v := range info {
+		switch v.(type) {
+		case []uint8:
+			arr := v.([]uint8)
+			info[k] = string(arr)
+		case nil:
+			info[k] = ""
+		}
+	}
 	return info
+}
+
+func GetStruct(table string, query map[string]interface{}, entityPtr interface{}) {
+	cond := db.Cond{}
+	for k, v := range query {
+		cond[k] = v
+	}
+	session.Collection(table).Find(cond).One(entityPtr)
 }
 func Update(table string, query map[string]interface{}, updateItem map[string]interface{}) (int64, error) {
 	cond := db.Cond{}

@@ -29,7 +29,9 @@ func (c *BaseController) List(ctx *gin.Context) {
 	if name != "" {
 		cond["com_name"] = db.Like(utils.SqlLike(name))
 	}
-	tableJson := dao.Page(entity.Table.Name, cond, listCol, pageIndex, pageSize)
+	var list []models.Company
+	tableJson := dao.PageStruct(entity.Table.Name, cond, listCol, &list, pageIndex, pageSize)
+	//tableJson := dao.Page(entity.Table.Name, cond, listCol, pageIndex, pageSize)
 	ctx.JSON(200, tableJson)
 }
 func (c *BaseController) Add(ctx *gin.Context) {
