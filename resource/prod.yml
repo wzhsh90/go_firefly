@@ -4,8 +4,7 @@ server:
   sessionname: firesession
   sessionkey: 5b25e00c5f15030007661881
 db:
-  dialect: mysql
-  url: root:zxcvbnm123@tcp(127.0.0.1:3306)/test?charset=utf8&parseTime=true&loc=Local
+  url: root:9o0p-[=]@tcp(192.168.50.16:3307)/libre_n?charset=utf8mb4&parseTime=true&loc=Local
   maxopen: 100
   maxlife: 120
   maxidle: 10

@@ -12,12 +12,7 @@ type Server struct {
 	TplPath     string
 }
 type DataSource struct {
-	Dialect   string
-	User      string
-	Password  string
-	Database  string
-	Host      string
-	Socket    string
+	Url       string
 	MaxLife   int
 	MaxIdle   int
 	MaxOpen   int

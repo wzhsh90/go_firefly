@@ -28,7 +28,7 @@ func init() {
 	}
 	//把yaml形式的字符串解析成struct类型
 	_ = yaml.Unmarshal(data, &bootConfig)
-	if bootConfig.Db.Dialect != "" {
+	if bootConfig.Db.Url != "" {
 		dao.InitFromConfig(bootConfig.Db)
 	} else {
 		log.Print("当前无数据配置")

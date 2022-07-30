@@ -6,8 +6,6 @@ import (
 	"firefly/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/upper/db/v4"
-
 	"strconv"
 )
 
@@ -22,16 +20,16 @@ type BaseController struct {
 
 func (c *BaseController) List(ctx *gin.Context) {
 	name := ctx.PostForm("name")
-	pageIndex := utils.ParseUnInt(ctx.PostForm("pageIndex"))
-	pageSize := utils.ParseUnInt(ctx.PostForm("pageSize"))
+	pageIndex := utils.ParseInt(ctx.PostForm("pageIndex"))
+	pageSize := utils.ParseInt(ctx.PostForm("pageSize"))
 	entity := models.ModInfoGenFile(modJson)
-	cond := db.Cond{}
+	cond := make(map[string]interface{})
 	if name != "" {
-		cond["com_name"] = db.Like(utils.SqlLike(name))
+		cond["com_name"] = name
 	}
-	var list []models.Company
-	tableJson := dao.PageStruct(entity.Table.Name, cond, listCol, &list, pageIndex, pageSize)
-	//tableJson := dao.Page(entity.Table.Name, cond, listCol, pageIndex, pageSize)
+	//var list []models.Company
+	//tableJson := dao.PageStruct(entity.Table.Name, cond, listCol, &list, pageIndex, pageSize)
+	tableJson := dao.Page(entity.Table.Name, cond, listCol, pageIndex, pageSize)
 	ctx.JSON(200, tableJson)
 }
 func (c *BaseController) Add(ctx *gin.Context) {

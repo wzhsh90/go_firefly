@@ -4,11 +4,7 @@ server:
   sessionname: firesession
   sessionkey: 5b25e00c5f15030007661881
 db:
-  dialect: mysql
-  user: root
-  password: 9o0p-[=]
-  database: tel_site
-  host: 192.168.50.16:3307
+  url: root:9o0p-[=]@tcp(192.168.50.16:3307)/tel_site?charset=utf8mb4&parseTime=true&loc=Local
   maxopen: 100
   maxlife: 120
   maxidle: 10
