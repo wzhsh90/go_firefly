@@ -1,0 +1,37 @@
+{
+  "columns": [
+    {
+      "title": "序号",
+      "width": 70,
+      "templet": "#indexTpl"
+    },
+    {
+      "field": "com_name",
+      "title": "名称",
+      "width": 200
+    },
+    {
+      "field": "com_desc",
+      "title": "备注",
+      "width": 100
+    },
+    {
+      "title": "操作",
+      "toolbar": "#barDemo",
+      "width": 140
+    }
+  ],
+  "query": [
+    {
+      "name": "com_name",
+      "op": "like",
+      "on": "len(com_name)!=0"
+    },
+    {
+      "name": "flag",
+      "op": "eq",
+      "on": "",
+      "default": 0
+    }
+  ]
+}

@@ -10,6 +10,7 @@ import (
 )
 
 var modJson = "resource/mod/company/company.mod.json"
+var listJson = "resource/mod/company/company.list.json"
 var addJson = "resource/mod/company/company.add.json"
 var updateJson = "resource/mod/company/company.update.json"
 var listCol = []string{"id", "com_name", "com_desc", "flag"}
@@ -19,17 +20,52 @@ type BaseController struct {
 }
 
 func (c *BaseController) List(ctx *gin.Context) {
-	name := ctx.PostForm("name")
+	formQuery := models.FormQueryGenFile(listJson)
 	pageIndex := utils.ParseInt(ctx.PostForm("pageIndex"))
 	pageSize := utils.ParseInt(ctx.PostForm("pageSize"))
 	entity := models.ModInfoGenFile(modJson)
-	cond := make(map[string]interface{})
-	if name != "" {
-		cond["com_name"] = name
+	columMap := entity.Columns
+	for idx, _ := range formQuery.Query {
+		item := formQuery.Query[idx]
+		val := ctx.PostForm(item.Name)
+		dbCol, dbOk := columMap[item.Name]
+		if dbOk {
+			if dbCol.LangType == "int" {
+				pval, per := strconv.ParseInt(val, 10, 64)
+				if per != nil {
+					pval = 0
+				}
+				formQuery.Query[idx].Val = pval
+			} else if dbCol.LangType == "float" {
+				pval, per := strconv.ParseFloat(val, 64)
+				if per != nil {
+					pval = 0
+				}
+				formQuery.Query[idx].Val = pval
+			} else {
+				formQuery.Query[idx].Val = val
+			}
+		} else {
+			if item.Default != nil {
+				formQuery.Query[idx].Val = item.Default
+			}
+		}
 	}
+	//cond := make(map[string]interface{})
+	//if name != "" {
+	//	cond["com_name"] = name
+	//}
 	//var list []models.Company
 	//tableJson := dao.PageStruct(entity.Table.Name, cond, listCol, &list, pageIndex, pageSize)
-	tableJson := dao.Page(entity.Table.Name, cond, listCol, pageIndex, pageSize)
+	//tableJson := dao.Page(entity.Table.Name, cond, listCol, pageIndex, pageSize)
+	//conds := make([]string, 0)
+	//sb := dao.SelectBuilder()
+	//if name != "" {
+	//	sb.Where()
+	//	conds = append(conds, sb.Like("com_name", utils.SqlLike(name)))
+	//}
+	//
+	tableJson := dao.PageSql(entity.Table.Name, formQuery.Query, listCol, pageIndex, pageSize)
 	ctx.JSON(200, tableJson)
 }
 func (c *BaseController) Add(ctx *gin.Context) {

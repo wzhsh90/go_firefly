@@ -71,6 +71,16 @@ type FormAddColumn struct {
 	Dom    string `json:"dom"`
 	Rule   string `json:"rule"`
 }
+type FormQueryInfo struct {
+	Query []FormQueryOp `json:"query"`
+}
+type FormQueryOp struct {
+	Name    string      `json:"name"`
+	Op      string      `json:"op"`
+	On      string      `json:"on"`
+	Val     interface{} `json:"-"`
+	Default interface{} `json:"default"`
+}
 
 func ModInfoGenFile(filePath string) ModInfo {
 	if utils.PathExists(filePath) {
@@ -115,5 +125,30 @@ func FormAddModGenFile(filePath string) FormAddInfo {
 func FormAddInfoGen(jsonByte []byte) FormAddInfo {
 	var info FormAddInfo
 	json.Unmarshal(jsonByte, &info)
+	return info
+}
+func FormQueryGenFile(filePath string) FormQueryInfo {
+	if utils.PathExists(filePath) {
+		_, fileName := filepath.Split(filePath)
+		if x, found := utils.GetCache(fileName); found {
+			return x.(FormQueryInfo)
+		}
+		data, err := ioutil.ReadFile(filePath)
+		if err != nil {
+			return FormQueryInfo{}
+		}
+		info := FormQueryInfoGen(data)
+		utils.SetCache(fileName, info)
+		return FormQueryInfo{}
+	} else {
+		return FormQueryInfo{}
+	}
+}
+func FormQueryInfoGen(jsonByte []byte) FormQueryInfo {
+	var info FormQueryInfo
+	uer := json.Unmarshal(jsonByte, &info)
+	if uer != nil {
+		println(uer.Error())
+	}
 	return info
 }

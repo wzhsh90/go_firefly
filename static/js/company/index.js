@@ -123,7 +123,7 @@ function editLayer() {
 
 function query() {
     var name = $.trim($("#name-input").val());
-    table.reload('list-table', {where: {"name": name}});
+    table.reload('list-table', {where: {"com_name": name}});
 }
 
 $(function () {
