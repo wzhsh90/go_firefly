@@ -5,11 +5,19 @@
     ],
     "tip": "当前公司名称已经存在"
   },
+  "select": [
+    "id",
+    "com_name",
+    "com_desc",
+    "flag"
+  ],
+  "query": [
+    {
+      "name": "id",
+      "op": "eq"
+    }
+  ],
   "columns": {
-    "id": {
-      "zh_name": "Id",
-      "rule": "required"
-    },
     "com_name": {
       "zh_name": "公司名称",
       "dom": "input",
@@ -21,7 +29,8 @@
     },
     "flag": {
       "zh_name": "启用标记",
-      "dom": "input"
+      "db_type": "tinyint(1)",
+      "lang_type": "int"
     }
   }
 }

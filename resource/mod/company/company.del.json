@@ -1,0 +1,14 @@
+{
+  "query": [
+    {
+      "name": "id",
+      "op": "eq"
+    },
+    {
+      "name": "flag",
+      "op": "eq",
+      "default": 0
+    }
+  ]
+}
+

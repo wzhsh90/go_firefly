@@ -1,4 +1,5 @@
 {
+  "select": ["id", "com_name", "com_desc", "flag"],
   "columns": [
     {
       "title": "序号",

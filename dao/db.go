@@ -3,7 +3,6 @@ package dao
 import (
 	models "firefly/model"
 	"firefly/utils"
-	"github.com/antonmedv/expr"
 	"github.com/huandu/go-sqlbuilder"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -34,6 +33,10 @@ func Save(table string, entity map[string]interface{}) (int64, error) {
 	tx := session.Table(table).Create(entity)
 	return tx.RowsAffected, tx.Error
 }
+func SaveBatch(table string, entity []map[string]interface{}) (int64, error) {
+	tx := session.Table(table).Create(entity)
+	return tx.RowsAffected, tx.Error
+}
 func Page(table string, cond map[string]interface{}, listCol []string, pageIndex, pageSize int) models.PageModelLay {
 	var itemsCount int64
 	_ = session.Table(table).Where(cond).Count(&itemsCount)
@@ -44,51 +47,17 @@ func Page(table string, cond map[string]interface{}, listCol []string, pageIndex
 	tableJsonData.Rows = list
 	return tableJsonData
 }
-func SelectBuilder() *sqlbuilder.SelectBuilder {
-	sb := sqlbuilder.NewSelectBuilder()
-	return sb
-}
-func PageSql(table string, cond []models.FormQueryOp, listCol []string, pageIndex, pageSize int) models.PageModelLay {
+func PageSql(table string, cond []models.FormOp, listCol []string, pageIndex, pageSize int) models.PageModelLay {
 	var itemsCount int64
 	sb := sqlbuilder.NewSelectBuilder()
 	sb.Select("count(*)").From(table)
 	if len(cond) >= 1 {
 		for _, v := range cond {
-			expFlag := false
-			if v.On != "" {
-				env := map[string]interface{}{
-					v.Name: v.Val,
-				}
-				program, err := expr.Compile(v.On, expr.Env(env), expr.AsBool())
-				if err == nil {
-					output, rerr := expr.Run(program, env)
-					if rerr == nil {
-						expFlag = output.(bool)
-					}
-				}
-			} else {
-				expFlag = true
-			}
+			expFlag := v.ExpOn()
 			if !expFlag {
 				continue
 			}
-			if v.Op == "eq" {
-				sb.Where(sb.Equal(v.Name, v.Val))
-			} else if v.Op == "like" {
-				sb.Where(sb.Like(v.Name, utils.SqlLike(v.Val.(string))))
-			} else if v.Op == "llike" {
-				sb.Where(sb.Like(v.Name, utils.LeftLike(v.Val.(string))))
-			} else if v.Op == "rlike" {
-				sb.Where(sb.Like(v.Name, utils.RightLike(v.Val.(string))))
-			} else if v.Op == "ge" {
-				sb.Where(sb.GE(v.Name, v.Val))
-			} else if v.Op == "gt" {
-				sb.Where(sb.G(v.Name, v.Val))
-			} else if v.Op == "le" {
-				sb.Where(sb.LE(v.Name, v.Val))
-			} else if v.Op == "lt" {
-				sb.Where(sb.L(v.Name, v.Val))
-			}
+			selectWhere(sb, v)
 		}
 	}
 	countSql, countArgs := sb.Build()
@@ -103,6 +72,63 @@ func PageSql(table string, cond []models.FormQueryOp, listCol []string, pageInde
 	session.Raw(listSql, countArgs...).Find(&list)
 	tableJsonData.Rows = list
 	return tableJsonData
+}
+func selectWhere(sb *sqlbuilder.SelectBuilder, v models.FormOp) {
+	if v.Op == "eq" {
+		sb.Where(sb.Equal(v.Name, v.Val))
+	} else if v.Op == "like" {
+		sb.Where(sb.Like(v.Name, utils.SqlLike(v.Val.(string))))
+	} else if v.Op == "llike" {
+		sb.Where(sb.Like(v.Name, utils.LeftLike(v.Val.(string))))
+	} else if v.Op == "rlike" {
+		sb.Where(sb.Like(v.Name, utils.RightLike(v.Val.(string))))
+	} else if v.Op == "ge" {
+		sb.Where(sb.GE(v.Name, v.Val))
+	} else if v.Op == "gt" {
+		sb.Where(sb.G(v.Name, v.Val))
+	} else if v.Op == "le" {
+		sb.Where(sb.LE(v.Name, v.Val))
+	} else if v.Op == "lt" {
+		sb.Where(sb.L(v.Name, v.Val))
+	}
+}
+func delWhere(sb *sqlbuilder.DeleteBuilder, v models.FormOp) {
+	if v.Op == "eq" {
+		sb.Where(sb.Equal(v.Name, v.Val))
+	} else if v.Op == "like" {
+		sb.Where(sb.Like(v.Name, utils.SqlLike(v.Val.(string))))
+	} else if v.Op == "llike" {
+		sb.Where(sb.Like(v.Name, utils.LeftLike(v.Val.(string))))
+	} else if v.Op == "rlike" {
+		sb.Where(sb.Like(v.Name, utils.RightLike(v.Val.(string))))
+	} else if v.Op == "ge" {
+		sb.Where(sb.GE(v.Name, v.Val))
+	} else if v.Op == "gt" {
+		sb.Where(sb.G(v.Name, v.Val))
+	} else if v.Op == "le" {
+		sb.Where(sb.LE(v.Name, v.Val))
+	} else if v.Op == "lt" {
+		sb.Where(sb.L(v.Name, v.Val))
+	}
+}
+func updateWhere(sb *sqlbuilder.UpdateBuilder, v models.FormOp) {
+	if v.Op == "eq" {
+		sb.Where(sb.Equal(v.Name, v.Val))
+	} else if v.Op == "like" {
+		sb.Where(sb.Like(v.Name, utils.SqlLike(v.Val.(string))))
+	} else if v.Op == "llike" {
+		sb.Where(sb.Like(v.Name, utils.LeftLike(v.Val.(string))))
+	} else if v.Op == "rlike" {
+		sb.Where(sb.Like(v.Name, utils.RightLike(v.Val.(string))))
+	} else if v.Op == "ge" {
+		sb.Where(sb.GE(v.Name, v.Val))
+	} else if v.Op == "gt" {
+		sb.Where(sb.G(v.Name, v.Val))
+	} else if v.Op == "le" {
+		sb.Where(sb.LE(v.Name, v.Val))
+	} else if v.Op == "lt" {
+		sb.Where(sb.L(v.Name, v.Val))
+	}
 }
 func PageStruct(table string, cond map[string]interface{}, listCol []string, listPtr interface{}, pageIndex, pageSize int) models.PageModelLay {
 	var itemsCount int64
@@ -119,6 +145,19 @@ func Count(table string, query map[string]interface{}) (int64, error) {
 	tx := session.Table(table).Where(query).Count(&totalCnt)
 	return totalCnt, tx.Error
 }
+func DelSql(table string, cond []models.FormOp) (int64, error) {
+	sb := sqlbuilder.NewDeleteBuilder()
+	sb.DeleteFrom(table)
+	if len(cond) >= 1 {
+		for _, v := range cond {
+			delWhere(sb, v)
+		}
+	}
+	delSql, delArgs := sb.Build()
+	tx := session.Exec(delSql, delArgs...)
+	return tx.RowsAffected, tx.Error
+}
+
 func Del(table string, query map[string]interface{}) (int64, error) {
 	info := EmptyStruct{}
 	tx := session.Table(table).Where(query).Delete(&info)
@@ -138,7 +177,23 @@ func GetCol(table string, query map[string]interface{}, listCol []string) map[st
 	//}
 	return info
 }
-
+func GetColSql(table string, cond []models.FormOp, listCol []string) map[string]interface{} {
+	info := make(map[string]interface{})
+	sb := sqlbuilder.NewSelectBuilder()
+	sb.Select(listCol...).From(table)
+	if len(cond) >= 1 {
+		for _, v := range cond {
+			expFlag := v.ExpOn()
+			if !expFlag {
+				continue
+			}
+			selectWhere(sb, v)
+		}
+	}
+	getSql, sqlArgs := sb.Limit(1).Build()
+	session.Raw(getSql, sqlArgs...).Find(&info)
+	return info
+}
 func GetColStruct(table string, query map[string]interface{}, listCol []string, entityPtr interface{}) {
 	session.Table(table).Where(query).Select(listCol).Limit(1).Find(entityPtr)
 }
@@ -162,6 +217,25 @@ func GetStruct(table string, query map[string]interface{}, entityPtr interface{}
 }
 func Update(table string, query map[string]interface{}, updateItem map[string]interface{}) (int64, error) {
 	tx := session.Table(table).Where(query).UpdateColumns(updateItem)
+	return tx.RowsAffected, tx.Error
+}
+func UpdateSql(table string, cond []models.FormOp, updateItem map[string]interface{}) (int64, error) {
+	sb := sqlbuilder.NewUpdateBuilder()
+	sb.Update(table)
+	for k, v := range updateItem {
+		sb.SetMore(sb.Assign(k, v))
+	}
+	if len(cond) >= 1 {
+		for _, v := range cond {
+			expFlag := v.ExpOn()
+			if !expFlag {
+				continue
+			}
+			updateWhere(sb, v)
+		}
+	}
+	updateSql, sqlArgs := sb.Build()
+	tx := session.Exec(updateSql, sqlArgs...)
 	return tx.RowsAffected, tx.Error
 }
 func CloseDb() {
