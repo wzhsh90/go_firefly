@@ -14,11 +14,18 @@
         </div>
     </div>
     <div class="layui-input-inline">
+        <select name="state" id="stateselect">
+            <option value="-1">所有...</option>
+            <option value="0">停用</option>
+            <option value="1">启用</option>
+        </select>
+    </div>
+    <div class="layui-input-inline">
         <button id="query-btn" class="layui-btn layui-btn-normal">
             <i class="layui-icon">&#xe615;</i>查询
         </button>
     </div>
-    <div class="layui-input-inline" >
+    <div class="layui-input-inline">
         <button id="add-btn" class="layui-btn" lay-event="add-com">
             <i class="layui-icon">&#xe608;</i>添加
         </button>
@@ -33,6 +40,12 @@
                    placeholder="请输入公司名称"
                    autocomplete="off"
                    class="layui-input"/>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">启用</label>
+        <div class="layui-input-block">
+            <input name="flag" type="checkbox" checked lay-skin="switch" lay-text="是|否">
         </div>
     </div>
     <div class="layui-form-item layui-form-text">
@@ -60,6 +73,12 @@
             <input type="hidden" name="id" value="@{id}"/>
         </div>
     </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">启用</label>
+        <div class="layui-input-block">
+            <input name="flag" type="checkbox" lay-skin="switch" {{if flag}}checked{{/if}} lay-text="是|否">
+        </div>
+    </div>
     <div class="layui-form-item layui-form-text">
         <label class="layui-form-label">备注:</label>
         <div class="layui-input-block">
@@ -70,8 +89,13 @@
         提交
     </button>
 </script>
-<script type="text/html" id="indexTpl">
-    {{d.LAY_INDEX}}
+
+<script type="text/html" id="flagTpl">
+    {{#  if(d.flag==0){ }}
+    停用
+    {{#  } else { }}
+    启用
+    {{#  } }}
 </script>
 <script type="text/html" id="barDemo">
     <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit">修改</a>

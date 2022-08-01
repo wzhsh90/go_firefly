@@ -26,6 +26,9 @@
 </script>
 <form id="exportForm" method="post" action="">
 </form>
+<script type="text/html" id="indexTpl">
+    {{d.LAY_INDEX}}
+</script>
 <script id="exportTpl" type="text/template">
     {{each fileds as item}}
     <input type="hidden" name="@{item.name}" value="@{item.val}"/>

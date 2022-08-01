@@ -10,7 +10,7 @@
     {
       "name": "flag",
       "op": "eq",
-      "on": "",
+      "on": "flag!=-1",
       "default": 0
     }
   ]

@@ -14,9 +14,11 @@ layui.use(['table'], function () {
     table = layui.table;
     layAjaxTable(table, {
         url: "/company/list",
+        where: {flag: -1},
         cols: [[
             {title: '序号', width: 70, templet: '#indexTpl'}
             , {field: 'com_name', title: '名称', width: 200}
+            , {templet: '#flagTpl', title: '启用状态', width: 100,align:"center"}
             , {field: 'com_desc', title: '备注', width: 100}
             , {title: '操作', toolbar: '#barDemo', width: 140}
         ]]
@@ -39,7 +41,7 @@ layui.use(['table'], function () {
 
 function ajaxUpdate(data) {
     var url = "/company/update";
-    data["flag"]=0
+    data["flag"]=data["flag"]=="on"?1:0;
     postAjax(url, data, function (res) {
         if (res["code"] == 0) {
             layer.msg(res["msg"]);
@@ -57,6 +59,7 @@ function ajaxUpdate(data) {
 
 function ajaxAdd(data) {
     var url = "/company/add";
+    data["flag"]=data["flag"]=="on"?1:0;
     postAjax(url, data, function (res) {
         if (res["code"] == 0) {
             query();
@@ -98,7 +101,7 @@ function listAddTo() {
     dialogOpen = layer.open({
         title: '添加公司'
         , type: 1
-        , area: dialogArea(['600px', "300px"])
+        , area:['600px', "400px"]
         , content: dom
         , btn: ['确定', '取消']
         , yes: function () {
@@ -112,7 +115,7 @@ function editLayer() {
     dialogOpen = layer.open({
         title: '编辑公司'
         , type: 1
-        , area: dialogArea(['600px', "300px"])
+        , area:['600px', "400px"]
         , content: dom
         , btn: ['确定', '取消']
         , yes: function () {
@@ -123,7 +126,8 @@ function editLayer() {
 
 function query() {
     var name = $.trim($("#name-input").val());
-    table.reload('list-table', {where: {"com_name": name}});
+    var state = $("#stateselect option:selected").val();
+    table.reload('list-table', {where: {"com_name": name,"flag":state}});
 }
 
 $(function () {
