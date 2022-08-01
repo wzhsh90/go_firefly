@@ -133,7 +133,7 @@ func (c *BaseController) Del(ctx *gin.Context) {
 			return
 		}
 	}
-	if crudInfo.Del.Physic {
+	if !crudInfo.Del.Fake {
 		db, _ := dao.DelSql(crudInfo.Mod.Table.Name, crudInfo.Del.Where)
 		if db == 1 {
 			rest.Code = 0

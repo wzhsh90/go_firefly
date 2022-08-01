@@ -168,7 +168,7 @@ func (c *FormInfo) GetFormData(columMap map[string]ColumnInfo, ctx *gin.Context,
 }
 
 type FormDel struct {
-	Physic bool `json:"physic"`
+	Fake bool `json:"fake"`
 	FormQuery
 }
 type FormQuery struct {
