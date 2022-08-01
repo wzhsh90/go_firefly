@@ -14,7 +14,7 @@ type ModInfo struct {
 	Name    string                `json:"name"`
 	Table   TableInfo             `json:"table"`
 	Columns map[string]ColumnInfo `json:"columns"`
-	Exits   FormExist             `json:"exits"`
+	Unique  FormUnique            `json:"unique"`
 }
 
 func (c *ModInfo) GetKeyCols() map[string]ColumnInfo {
@@ -177,7 +177,7 @@ type FormUpdate struct {
 	FormQuery
 }
 
-type FormExist struct {
+type FormUnique struct {
 	Columns []string `json:"columns"`
 	Tip     string   `json:"tip"`
 }

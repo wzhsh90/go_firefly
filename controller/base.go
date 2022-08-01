@@ -38,14 +38,14 @@ func (c *BaseController) Add(ctx *gin.Context) {
 	}
 	//todo 处理File 上传问题
 	//判断当前数据是否存在
-	if len(crudInfo.Mod.Exits.Columns) >= 1 {
+	if len(crudInfo.Mod.Unique.Columns) >= 1 {
 		existMap := make(map[string]interface{})
-		for _, v := range crudInfo.Mod.Exits.Columns {
+		for _, v := range crudInfo.Mod.Unique.Columns {
 			existMap[v] = dbData[v]
 		}
 		existFlag, _ := dao.Exists(crudInfo.Mod.Table.Name, existMap)
 		if existFlag {
-			rest.Message = crudInfo.Mod.Exits.Tip
+			rest.Message = crudInfo.Mod.Unique.Tip
 			ctx.JSON(200, rest)
 			return
 		}
@@ -82,10 +82,10 @@ func (c *BaseController) Update(ctx *gin.Context) {
 		return
 	}
 	//判断当前数据是否存在
-	if len(crudInfo.Mod.Exits.Columns) >= 1 {
+	if len(crudInfo.Mod.Unique.Columns) >= 1 {
 		existMap := make(map[string]interface{})
 		checkFlag := false
-		for _, v := range crudInfo.Mod.Exits.Columns {
+		for _, v := range crudInfo.Mod.Unique.Columns {
 			existMap[v] = formData[v]
 			if orgInfo[v] != formData[v] {
 				checkFlag = true
@@ -100,7 +100,7 @@ func (c *BaseController) Update(ctx *gin.Context) {
 		if checkFlag {
 			existFlag, _ := dao.Exists(crudInfo.Mod.Table.Name, existMap)
 			if existFlag {
-				rest.Message = crudInfo.Mod.Exits.Tip
+				rest.Message = crudInfo.Mod.Unique.Tip
 				ctx.JSON(200, rest)
 				return
 			}

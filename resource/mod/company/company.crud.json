@@ -29,7 +29,7 @@
         "default": 1
       }
     },
-    "exits": {
+    "unique": {
       "columns": [
         "com_name"
       ],
@@ -37,6 +37,7 @@
     }
   },
   "list": {
+    "sql": "",
     "select": [
       "id",
       "com_name",
