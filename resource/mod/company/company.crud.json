@@ -59,6 +59,12 @@
     "order": "id desc"
   },
   "del": {
+    "select": [
+      "id",
+      "com_name",
+      "com_desc",
+      "flag"
+    ],
     "where": [
       {
         "name": "id",

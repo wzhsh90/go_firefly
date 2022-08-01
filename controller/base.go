@@ -77,7 +77,7 @@ func (c *BaseController) Update(ctx *gin.Context) {
 	}
 	orgInfo := dao.GetColSql(crudInfo.Mod.Table.Name, crudInfo.Update.Where, crudInfo.Update.Select)
 	if len(orgInfo) == 0 {
-		rest.Message = "获取历史数据失败或已不存在"
+		rest.Message = "数据获取失败或已不存在"
 		ctx.JSON(200, rest)
 		return
 	}
@@ -119,6 +119,14 @@ func (c *BaseController) Del(ctx *gin.Context) {
 	var rest = models.RestResult{}
 	rest.Code = 1
 	crudInfo := models.LoadCrudFile(crudJson)
+	if len(crudInfo.Del.Select) != 0 {
+		orgInfo := dao.GetColSql(crudInfo.Mod.Table.Name, crudInfo.Del.Where, crudInfo.Del.Select)
+		if len(orgInfo) == 0 {
+			rest.Message = "数据获取失败或已不存在"
+			ctx.JSON(200, rest)
+			return
+		}
+	}
 	columMap := crudInfo.Mod.Columns
 	valid := crudInfo.Del.StrictParse(columMap, ctx)
 	if !valid {
