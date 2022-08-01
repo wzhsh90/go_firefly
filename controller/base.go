@@ -5,7 +5,6 @@ import (
 	models "firefly/model"
 	"firefly/utils"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 )
 
 var modJson = "resource/mod/company/company.mod.json"
@@ -13,7 +12,6 @@ var listJson = "resource/mod/company/company.list.json"
 var delJson = "resource/mod/company/company.del.json"
 var addJson = "resource/mod/company/company.add.json"
 var updateJson = "resource/mod/company/company.update.json"
-var validate = validator.New()
 
 type BaseController struct {
 }

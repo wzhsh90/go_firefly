@@ -7,6 +7,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"time"
 )
 
 var session *gorm.DB
@@ -21,6 +22,10 @@ func InitFromConfig(dbConfig models.DataSource) {
 	if err != nil {
 		panic(err)
 	}
+	sqlDB, _ := db.DB()
+	sqlDB.SetMaxOpenConns(dbConfig.MaxOpen)
+	sqlDB.SetConnMaxIdleTime(time.Duration(dbConfig.MaxIdle) * time.Second)
+	sqlDB.SetConnMaxLifetime(time.Duration(dbConfig.MaxLife) * time.Second)
 	session = db
 
 }
@@ -37,17 +42,17 @@ func SaveBatch(table string, entity []map[string]interface{}) (int64, error) {
 	tx := session.Table(table).Create(entity)
 	return tx.RowsAffected, tx.Error
 }
-func Page(table string, cond map[string]interface{}, listCol []string, pageIndex, pageSize int) models.PageModelLay {
+func Page(table string, cond map[string]interface{}, cols []string, pageIndex, pageSize int) models.PageModelLay {
 	var itemsCount int64
 	_ = session.Table(table).Where(cond).Count(&itemsCount)
 	list := make([]map[string]interface{}, 0)
 	var tableJsonData = models.PageModelLay{}
 	tableJsonData.BuildPageInfo(pageIndex, pageSize, int(itemsCount))
-	session.Table(table).Where(cond).Select(listCol).Offset(tableJsonData.PageIndex).Limit(tableJsonData.PageSize).Find(&list)
+	session.Table(table).Where(cond).Select(cols).Offset(tableJsonData.PageIndex).Limit(tableJsonData.PageSize).Find(&list)
 	tableJsonData.Rows = list
 	return tableJsonData
 }
-func PageSql(table string, cond []models.FormOp, listCol []string, pageIndex, pageSize int) models.PageModelLay {
+func PageSql(table string, cond []models.FormOp, cols []string, pageIndex, pageSize int) models.PageModelLay {
 	var itemsCount int64
 	sb := sqlbuilder.NewSelectBuilder()
 	sb.Select("count(*)").From(table)
@@ -66,7 +71,7 @@ func PageSql(table string, cond []models.FormOp, listCol []string, pageIndex, pa
 	var tableJsonData = models.PageModelLay{}
 	tableJsonData.BuildPageInfo(pageIndex, pageSize, int(itemsCount))
 	list := make([]map[string]interface{}, 0)
-	sb.Select(listCol...).From(table)
+	sb.Select(cols...).From(table)
 	listSql, _ := sb.Offset(tableJsonData.PageIndex).Limit(tableJsonData.PageSize).Build()
 	//println(listSql)
 	session.Raw(listSql, countArgs...).Find(&list)
@@ -130,12 +135,12 @@ func updateWhere(sb *sqlbuilder.UpdateBuilder, v models.FormOp) {
 		sb.Where(sb.L(v.Name, v.Val))
 	}
 }
-func PageStruct(table string, cond map[string]interface{}, listCol []string, listPtr interface{}, pageIndex, pageSize int) models.PageModelLay {
+func PageStruct(table string, cond map[string]interface{}, cols []string, listPtr interface{}, pageIndex, pageSize int) models.PageModelLay {
 	var itemsCount int64
 	_ = session.Table(table).Where(cond).Count(&itemsCount)
 	var tableJsonData = models.PageModelLay{}
 	tableJsonData.BuildPageInfo(pageIndex, pageSize, int(itemsCount))
-	session.Table(table).Where(cond).Select(listCol).Offset(tableJsonData.PageIndex).Limit(tableJsonData.PageSize).Find(listPtr)
+	session.Table(table).Where(cond).Select(cols).Offset(tableJsonData.PageIndex).Limit(tableJsonData.PageSize).Find(listPtr)
 	tableJsonData.Rows = listPtr
 	return tableJsonData
 }
@@ -163,9 +168,9 @@ func Del(table string, query map[string]interface{}) (int64, error) {
 	tx := session.Table(table).Where(query).Delete(&info)
 	return tx.RowsAffected, tx.Error
 }
-func GetCol(table string, query map[string]interface{}, listCol []string) map[string]interface{} {
+func GetCol(table string, query map[string]interface{}, cols []string) map[string]interface{} {
 	info := make(map[string]interface{})
-	session.Table(table).Where(query).Select(listCol).Limit(1).Find(&info)
+	session.Table(table).Where(query).Select(cols).Limit(1).Find(&info)
 	//for k, v := range info {
 	//	switch v.(type) {
 	//	case []uint8:
@@ -177,10 +182,10 @@ func GetCol(table string, query map[string]interface{}, listCol []string) map[st
 	//}
 	return info
 }
-func GetColSql(table string, cond []models.FormOp, listCol []string) map[string]interface{} {
+func GetColSql(table string, cond []models.FormOp, cols []string) map[string]interface{} {
 	info := make(map[string]interface{})
 	sb := sqlbuilder.NewSelectBuilder()
-	sb.Select(listCol...).From(table)
+	sb.Select(cols...).From(table)
 	if len(cond) >= 1 {
 		for _, v := range cond {
 			expFlag := v.ExpOn()
@@ -194,8 +199,8 @@ func GetColSql(table string, cond []models.FormOp, listCol []string) map[string]
 	session.Raw(getSql, sqlArgs...).Find(&info)
 	return info
 }
-func GetColStruct(table string, query map[string]interface{}, listCol []string, entityPtr interface{}) {
-	session.Table(table).Where(query).Select(listCol).Limit(1).Find(entityPtr)
+func GetColStruct(table string, query map[string]interface{}, cols []string, entityPtr interface{}) {
+	session.Table(table).Where(query).Select(cols).Limit(1).Find(entityPtr)
 }
 func Get(table string, query map[string]interface{}) map[string]interface{} {
 	info := make(map[string]interface{})
@@ -239,4 +244,8 @@ func UpdateSql(table string, cond []models.FormOp, updateItem map[string]interfa
 	return tx.RowsAffected, tx.Error
 }
 func CloseDb() {
+	sqlDB, err := session.DB()
+	if err == nil {
+		sqlDB.Close()
+	}
 }
