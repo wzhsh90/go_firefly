@@ -24,7 +24,8 @@
     "flag": {
       "zh_name": "启用标记",
       "db_type": "tinyint(1)",
-      "lang_type": "int"
+      "lang_type": "int",
+      "default": 0
     }
   }
 }

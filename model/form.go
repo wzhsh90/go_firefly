@@ -31,11 +31,12 @@ type TableInfo struct {
 	ZhName string `json:"zh_name"`
 }
 type ColumnInfo struct {
-	ZhName   string `json:"zh_name"`
-	DbType   string `json:"db_type"`
-	LangType string `json:"lang_type"`
-	Key      bool   `json:"key"`
-	Index    string `json:"index"`
+	ZhName   string      `json:"zh_name"`
+	DbType   string      `json:"db_type"`
+	LangType string      `json:"lang_type"`
+	Default  interface{} `json:"default"`
+	Key      bool        `json:"key"`
+	Index    string      `json:"index"`
 }
 type FormInfo struct {
 	Columns map[string]FormField `json:"columns"`
@@ -118,13 +119,27 @@ func (c *FormAdd) GetFormData(columMap map[string]ColumnInfo, ctx *gin.Context, 
 			if formOk {
 				dbData[k] = formVal
 			} else {
-				if dbCol.LangType == "string" {
-					dbData[k] = ""
-					if dbCol.Key {
-						dbData[k] = utils.NewId()
+				if dbCol.Default != nil {
+					//处理json string 里面是int 但unmarshal 后为float
+					if dbCol.LangType == "int" {
+						titem, ok := dbCol.Default.(float64)
+						if ok {
+							dbData[k] = int64(titem)
+						} else {
+							dbData[k] = 0
+						}
+					} else {
+						dbData[k] = dbCol.Default
 					}
-				} else if dbCol.LangType == "int" || dbCol.LangType == "float" {
-					dbData[k] = 0
+				} else {
+					if dbCol.LangType == "string" {
+						dbData[k] = ""
+						if dbCol.Key {
+							dbData[k] = utils.NewId()
+						}
+					} else if dbCol.LangType == "int" || dbCol.LangType == "float" {
+						dbData[k] = 0
+					}
 				}
 			}
 		}
