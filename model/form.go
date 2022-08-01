@@ -177,6 +177,7 @@ type FormQuery struct {
 	Dir    string   `json:"-"`
 	Select []string `json:"select"`
 	Where  []FormOp `json:"where"`
+	Order  string   `json:"order"`
 }
 type FormUpdate struct {
 	FormAdd

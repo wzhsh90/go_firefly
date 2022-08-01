@@ -26,7 +26,7 @@ func (c *BaseController) List(ctx *gin.Context) {
 		ctx.String(200, "数据不合法")
 		return
 	}
-	tableJson := dao.PageSql(modInfo.Table.Name, formQuery.Where, formQuery.Select, pageIndex, pageSize)
+	tableJson := dao.PageSql(modInfo.Table.Name, formQuery.Where, formQuery.Select, formQuery.Order, pageIndex, pageSize)
 	ctx.JSON(200, tableJson)
 }
 func (c *BaseController) Add(ctx *gin.Context) {

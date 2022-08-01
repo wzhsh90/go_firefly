@@ -13,5 +13,6 @@
       "on": "flag!=-1",
       "default": 0
     }
-  ]
+  ],
+  "order": "id desc"
 }

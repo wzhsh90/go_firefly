@@ -52,7 +52,7 @@ func Page(table string, cond map[string]interface{}, cols []string, pageIndex, p
 	tableJsonData.Rows = list
 	return tableJsonData
 }
-func PageSql(table string, cond []models.FormOp, cols []string, pageIndex, pageSize int) models.PageModelLay {
+func PageSql(table string, cond []models.FormOp, cols []string, orderBy string, pageIndex, pageSize int) models.PageModelLay {
 	var itemsCount int64
 	sb := sqlbuilder.NewSelectBuilder()
 	sb.Select("count(*)").From(table)
@@ -72,6 +72,9 @@ func PageSql(table string, cond []models.FormOp, cols []string, pageIndex, pageS
 	tableJsonData.BuildPageInfo(pageIndex, pageSize, int(itemsCount))
 	list := make([]map[string]interface{}, 0)
 	sb.Select(cols...).From(table)
+	if orderBy != "" {
+		sb.OrderBy(orderBy)
+	}
 	listSql, _ := sb.Offset(tableJsonData.PageIndex).Limit(tableJsonData.PageSize).Build()
 	//println(listSql)
 	session.Raw(listSql, countArgs...).Find(&list)
