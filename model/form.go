@@ -40,8 +40,6 @@ type ColumnInfo struct {
 	Index    string      `json:"index"`
 }
 type FormInfo struct {
-	Mod     string               `json:"mod"`
-	Dir     string               `json:"-"`
 	Columns map[string]FormField `json:"columns"`
 }
 
@@ -61,16 +59,12 @@ func (c *FormInfo) GetRules() map[string]interface{} {
 	return rules
 }
 
-type FormAdd struct {
-	FormInfo
-	Exits FormExist `json:"exits"`
-}
 type ValidResp struct {
 	Valid bool
 	Msg   string
 }
 
-func (c *FormAdd) GetFormData(columMap map[string]ColumnInfo, ctx *gin.Context, create bool) (map[string]interface{}, map[string]interface{}, ValidResp) {
+func (c *FormInfo) GetFormData(columMap map[string]ColumnInfo, ctx *gin.Context, create bool) (map[string]interface{}, map[string]interface{}, ValidResp) {
 	formData := make(map[string]interface{})
 	dbData := make(map[string]interface{})
 	//生成form data
@@ -174,14 +168,12 @@ func (c *FormAdd) GetFormData(columMap map[string]ColumnInfo, ctx *gin.Context, 
 }
 
 type FormQuery struct {
-	Mod    string   `json:"mod"`
-	Dir    string   `json:"-"`
 	Select []string `json:"select"`
 	Where  []FormOp `json:"where"`
 	Order  string   `json:"order"`
 }
 type FormUpdate struct {
-	FormAdd
+	FormInfo
 	FormQuery
 }
 

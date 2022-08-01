@@ -10,7 +10,7 @@ import (
 type CurdInfo struct {
 	Mod    ModInfo    `json:"mod"`
 	List   FormQuery  `json:"list"`
-	Add    FormAdd    `json:"add"`
+	Add    FormInfo   `json:"add"`
 	Update FormUpdate `json:"update"`
 	Del    FormQuery  `json:"del"`
 }
