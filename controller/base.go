@@ -119,6 +119,12 @@ func (c *BaseController) Del(ctx *gin.Context) {
 	var rest = models.RestResult{}
 	rest.Code = 1
 	crudInfo := models.LoadCrudFile(crudJson)
+	columMap := crudInfo.Mod.Columns
+	valid := crudInfo.Del.StrictParse(columMap, ctx)
+	if !valid {
+		rest.Message = "数据不合法"
+		ctx.JSON(200, rest)
+	}
 	if len(crudInfo.Del.Select) != 0 {
 		orgInfo := dao.GetColSql(crudInfo.Mod.Table.Name, crudInfo.Del.Where, crudInfo.Del.Select)
 		if len(orgInfo) == 0 {
@@ -126,12 +132,6 @@ func (c *BaseController) Del(ctx *gin.Context) {
 			ctx.JSON(200, rest)
 			return
 		}
-	}
-	columMap := crudInfo.Mod.Columns
-	valid := crudInfo.Del.StrictParse(columMap, ctx)
-	if !valid {
-		rest.Message = "数据不合法"
-		ctx.JSON(200, rest)
 	}
 	db, _ := dao.DelSql(crudInfo.Mod.Table.Name, crudInfo.Del.Where)
 	if db == 1 {
