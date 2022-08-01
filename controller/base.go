@@ -7,34 +7,30 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var modJson = "resource/mod/company/company.mod.json"
-var listJson = "resource/mod/company/company.list.json"
-var delJson = "resource/mod/company/company.del.json"
-var addJson = "resource/mod/company/company.add.json"
-var updateJson = "resource/mod/company/company.update.json"
+var crudJson = "resource/mod/company/company.crud.json"
 
 type BaseController struct {
 }
 
 func (c *BaseController) List(ctx *gin.Context) {
-	formQuery, modInfo := models.FormQueryLoadFile(listJson)
+	crudInfo := models.LoadCrudFile(crudJson)
 	pageIndex := utils.ParseInt(ctx.PostForm("pageIndex"))
 	pageSize := utils.ParseInt(ctx.PostForm("pageSize"))
-	columMap := modInfo.Columns
-	valid := formQuery.UnStrictParse(columMap, ctx)
+	columMap := crudInfo.Mod.Columns
+	valid := crudInfo.List.UnStrictParse(columMap, ctx)
 	if !valid {
 		ctx.String(200, "数据不合法")
 		return
 	}
-	tableJson := dao.PageSql(modInfo.Table.Name, formQuery.Where, formQuery.Select, formQuery.Order, pageIndex, pageSize)
+	tableJson := dao.PageSql(crudInfo.Mod.Table.Name, crudInfo.List.Where, crudInfo.List.Select, crudInfo.List.Order, pageIndex, pageSize)
 	ctx.JSON(200, tableJson)
 }
 func (c *BaseController) Add(ctx *gin.Context) {
 	var rest = models.RestResult{}
 	rest.Code = 1
-	formAdd, modInfo := models.FormAddLoadFile(addJson)
-	columMap := modInfo.Columns
-	_, dbData, validResp := formAdd.GetFormData(columMap, ctx, true)
+	crudInfo := models.LoadCrudFile(crudJson)
+	columMap := crudInfo.Mod.Columns
+	_, dbData, validResp := crudInfo.Add.GetFormData(columMap, ctx, true)
 	if !validResp.Valid {
 		rest.Message = validResp.Msg
 		ctx.JSON(200, rest)
@@ -42,19 +38,19 @@ func (c *BaseController) Add(ctx *gin.Context) {
 	}
 	//todo 处理File 上传问题
 	//判断当前数据是否存在
-	if len(formAdd.Exits.Columns) >= 1 {
+	if len(crudInfo.Add.Exits.Columns) >= 1 {
 		existMap := make(map[string]interface{})
-		for _, v := range formAdd.Exits.Columns {
+		for _, v := range crudInfo.Add.Exits.Columns {
 			existMap[v] = dbData[v]
 		}
-		existFlag, _ := dao.Exists(modInfo.Table.Name, existMap)
+		existFlag, _ := dao.Exists(crudInfo.Mod.Table.Name, existMap)
 		if existFlag {
-			rest.Message = formAdd.Exits.Tip
+			rest.Message = crudInfo.Add.Exits.Tip
 			ctx.JSON(200, rest)
 			return
 		}
 	}
-	_, serr := dao.Save(modInfo.Table.Name, dbData)
+	_, serr := dao.Save(crudInfo.Mod.Table.Name, dbData)
 	if serr == nil {
 		rest.Code = 0
 		rest.Message = "添加成功"
@@ -66,30 +62,30 @@ func (c *BaseController) Add(ctx *gin.Context) {
 func (c *BaseController) Update(ctx *gin.Context) {
 	var rest = models.RestResult{}
 	rest.Code = 1
-	formUpdate, modInfo := models.FormUpdateLoadFile(updateJson)
-	columMap := modInfo.Columns
-	formData, dbData, validResp := formUpdate.GetFormData(columMap, ctx, false)
+	crudInfo := models.LoadCrudFile(crudJson)
+	columMap := crudInfo.Mod.Columns
+	formData, dbData, validResp := crudInfo.Update.GetFormData(columMap, ctx, false)
 	if !validResp.Valid {
 		rest.Message = validResp.Msg
 		ctx.JSON(200, rest)
 		return
 	}
-	valid := formUpdate.StrictParse(columMap, ctx)
+	valid := crudInfo.Update.StrictParse(columMap, ctx)
 	if !valid {
 		rest.Message = "数据不合法"
 		ctx.JSON(200, rest)
 	}
-	orgInfo := dao.GetColSql(modInfo.Table.Name, formUpdate.Where, formUpdate.Select)
+	orgInfo := dao.GetColSql(crudInfo.Mod.Table.Name, crudInfo.Update.Where, crudInfo.Update.Select)
 	if len(orgInfo) == 0 {
 		rest.Message = "获取历史数据失败或已不存在"
 		ctx.JSON(200, rest)
 		return
 	}
 	//判断当前数据是否存在
-	if len(formUpdate.Exits.Columns) >= 1 {
+	if len(crudInfo.Update.Exits.Columns) >= 1 {
 		existMap := make(map[string]interface{})
 		checkFlag := false
-		for _, v := range formUpdate.Exits.Columns {
+		for _, v := range crudInfo.Update.Exits.Columns {
 			existMap[v] = formData[v]
 			if orgInfo[v] != formData[v] {
 				checkFlag = true
@@ -102,15 +98,15 @@ func (c *BaseController) Update(ctx *gin.Context) {
 			}
 		}
 		if checkFlag {
-			existFlag, _ := dao.Exists(modInfo.Table.Name, existMap)
+			existFlag, _ := dao.Exists(crudInfo.Mod.Table.Name, existMap)
 			if existFlag {
-				rest.Message = formUpdate.Exits.Tip
+				rest.Message = crudInfo.Update.Exits.Tip
 				ctx.JSON(200, rest)
 				return
 			}
 		}
 	}
-	_, serr := dao.UpdateSql(modInfo.Table.Name, formUpdate.Where, dbData)
+	_, serr := dao.UpdateSql(crudInfo.Mod.Table.Name, crudInfo.Update.Where, dbData)
 	if serr == nil {
 		rest.Code = 0
 		rest.Message = "修改成功"
@@ -122,14 +118,14 @@ func (c *BaseController) Update(ctx *gin.Context) {
 func (c *BaseController) Del(ctx *gin.Context) {
 	var rest = models.RestResult{}
 	rest.Code = 1
-	formQuery, modInfo := models.FormQueryLoadFile(delJson)
-	columMap := modInfo.Columns
-	valid := formQuery.StrictParse(columMap, ctx)
+	crudInfo := models.LoadCrudFile(crudJson)
+	columMap := crudInfo.Mod.Columns
+	valid := crudInfo.Del.StrictParse(columMap, ctx)
 	if !valid {
 		rest.Message = "数据不合法"
 		ctx.JSON(200, rest)
 	}
-	db, _ := dao.DelSql(modInfo.Table.Name, formQuery.Where)
+	db, _ := dao.DelSql(crudInfo.Mod.Table.Name, crudInfo.Del.Where)
 	if db == 1 {
 		rest.Code = 0
 		rest.Message = "删除成功"

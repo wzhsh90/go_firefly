@@ -1,0 +1,116 @@
+{
+  "mod": {
+    "name": "company",
+    "table": {
+      "name": "sys_company_t",
+      "zh_name": "公司信息"
+    },
+    "columns": {
+      "id": {
+        "zh_name": "Id",
+        "db_type": "varchar(24)",
+        "lang_type": "string",
+        "key": true
+      },
+      "com_name": {
+        "zh_name": "公司名称",
+        "db_type": "varchar(100)",
+        "lang_type": "string"
+      },
+      "com_desc": {
+        "zh_name": "备注",
+        "db_type": "varchar(100)",
+        "lang_type": "string"
+      },
+      "flag": {
+        "zh_name": "启用标记",
+        "db_type": "tinyint(1)",
+        "lang_type": "int",
+        "default": 1
+      }
+    },
+    "exits": {
+      "columns": [
+        "com_name"
+      ],
+      "tip": "当前公司名称已经存在"
+    }
+  },
+  "list": {
+    "select": [
+      "id",
+      "com_name",
+      "com_desc",
+      "flag"
+    ],
+    "where": [
+      {
+        "name": "com_name",
+        "op": "like",
+        "on": "len(com_name)!=0"
+      },
+      {
+        "name": "flag",
+        "op": "eq",
+        "on": "flag!=-1",
+        "default": 0
+      }
+    ],
+    "order": "id desc"
+  },
+  "del": {
+    "where": [
+      {
+        "name": "id",
+        "op": "eq"
+      },
+      {
+        "name": "flag",
+        "op": "eq",
+        "default": 0
+      }
+    ]
+  },
+  "add": {
+    "columns": {
+      "com_name": {
+        "zh_name": "公司名称",
+        "dom": "input",
+        "rule": "required"
+      },
+      "com_desc": {
+        "zh_name": "备注",
+        "dom": "input"
+      }
+    }
+  },
+  "update": {
+    "select": [
+      "id",
+      "com_name",
+      "com_desc",
+      "flag"
+    ],
+    "where": [
+      {
+        "name": "id",
+        "op": "eq"
+      }
+    ],
+    "columns": {
+      "com_name": {
+        "zh_name": "公司名称",
+        "dom": "input",
+        "rule": "required"
+      },
+      "com_desc": {
+        "zh_name": "备注",
+        "dom": "input"
+      },
+      "flag": {
+        "zh_name": "启用标记",
+        "dom": "input"
+      }
+    }
+  }
+}

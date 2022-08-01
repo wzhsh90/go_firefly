@@ -14,6 +14,7 @@ type ModInfo struct {
 	Name    string                `json:"name"`
 	Table   TableInfo             `json:"table"`
 	Columns map[string]ColumnInfo `json:"columns"`
+	Exits   FormExist             `json:"exits"`
 }
 
 func (c *ModInfo) GetKeyCols() map[string]ColumnInfo {
