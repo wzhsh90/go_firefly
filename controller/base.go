@@ -133,12 +133,26 @@ func (c *BaseController) Del(ctx *gin.Context) {
 			return
 		}
 	}
-	db, _ := dao.DelSql(crudInfo.Mod.Table.Name, crudInfo.Del.Where)
-	if db == 1 {
-		rest.Code = 0
-		rest.Message = "删除成功"
+	if crudInfo.Del.Physic {
+		db, _ := dao.DelSql(crudInfo.Mod.Table.Name, crudInfo.Del.Where)
+		if db == 1 {
+			rest.Code = 0
+			rest.Message = "删除成功"
+		} else {
+			rest.Message = "删除失败"
+		}
+
 	} else {
-		rest.Message = "删除失败"
+		dbData := map[string]interface{}{
+			"del_flag": 1,
+		}
+		db, _ := dao.UpdateSql(crudInfo.Mod.Table.Name, crudInfo.Update.Where, dbData)
+		if db == 1 {
+			rest.Code = 0
+			rest.Message = "删除成功"
+		} else {
+			rest.Message = "删除失败"
+		}
 	}
 	ctx.JSON(200, rest)
 }

@@ -153,6 +153,7 @@ func Count(table string, query map[string]interface{}) (int64, error) {
 	tx := session.Table(table).Where(query).Count(&totalCnt)
 	return totalCnt, tx.Error
 }
+
 func DelSql(table string, cond []models.FormOp) (int64, error) {
 	sb := sqlbuilder.NewDeleteBuilder()
 	sb.DeleteFrom(table)

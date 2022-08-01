@@ -60,6 +60,7 @@
     "order": "id desc"
   },
   "del": {
+    "physic": true,
     "select": [
       "id",
       "com_name",

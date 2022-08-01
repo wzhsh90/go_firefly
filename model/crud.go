@@ -12,7 +12,7 @@ type CurdInfo struct {
 	List   FormQuery  `json:"list"`
 	Add    FormInfo   `json:"add"`
 	Update FormUpdate `json:"update"`
-	Del    FormQuery  `json:"del"`
+	Del    FormDel    `json:"del"`
 }
 
 func LoadCrudFile(filePath string) CurdInfo {
