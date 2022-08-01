@@ -146,7 +146,7 @@ func (c *BaseController) Del(ctx *gin.Context) {
 		dbData := map[string]interface{}{
 			"del_flag": 1,
 		}
-		db, _ := dao.UpdateSql(crudInfo.Mod.Table.Name, crudInfo.Update.Where, dbData)
+		db, _ := dao.UpdateSql(crudInfo.Mod.Table.Name, crudInfo.Del.Where, dbData)
 		if db == 1 {
 			rest.Code = 0
 			rest.Message = "删除成功"
