@@ -39,6 +39,8 @@ type ColumnInfo struct {
 	Index    string      `json:"index"`
 }
 type FormInfo struct {
+	Mod     string               `json:"mod"`
+	Dir     string               `json:"-"`
 	Columns map[string]FormField `json:"columns"`
 }
 
@@ -171,8 +173,10 @@ func (c *FormAdd) GetFormData(columMap map[string]ColumnInfo, ctx *gin.Context, 
 }
 
 type FormQuery struct {
+	Mod    string   `json:"mod"`
+	Dir    string   `json:"-"`
 	Select []string `json:"select"`
-	Query  []FormOp `json:"query"`
+	Where  []FormOp `json:"where"`
 }
 type FormUpdate struct {
 	FormAdd
@@ -185,8 +189,8 @@ type FormExist struct {
 }
 
 func (c *FormQuery) UnStrictParse(columMap map[string]ColumnInfo, ctx *gin.Context) bool {
-	for idx, _ := range c.Query {
-		item := c.Query[idx]
+	for idx, _ := range c.Where {
+		item := c.Where[idx]
 		val := ctx.PostForm(item.Name)
 		dbCol, dbOk := columMap[item.Name]
 		if dbOk {
@@ -196,15 +200,15 @@ func (c *FormQuery) UnStrictParse(columMap map[string]ColumnInfo, ctx *gin.Conte
 					if per != nil {
 						pval = 0
 					}
-					c.Query[idx].Val = pval
+					c.Where[idx].Val = pval
 				} else if dbCol.LangType == "float" {
 					pval, per := strconv.ParseFloat(val, 64)
 					if per != nil {
 						pval = 0
 					}
-					c.Query[idx].Val = pval
+					c.Where[idx].Val = pval
 				} else {
-					c.Query[idx].Val = val
+					c.Where[idx].Val = val
 				}
 			} else {
 				if item.Default != nil {
@@ -212,13 +216,15 @@ func (c *FormQuery) UnStrictParse(columMap map[string]ColumnInfo, ctx *gin.Conte
 					if dbCol.LangType == "int" {
 						titem, ok := item.Default.(float64)
 						if ok {
-							c.Query[idx].Val = int64(titem)
+							c.Where[idx].Val = int64(titem)
 						} else {
-							c.Query[idx].Val = 0
+							c.Where[idx].Val = 0
 						}
 					} else {
-						c.Query[idx].Val = item.Default
+						c.Where[idx].Val = item.Default
 					}
+				} else {
+					c.Where[idx].Val = ""
 				}
 			}
 
@@ -229,8 +235,8 @@ func (c *FormQuery) UnStrictParse(columMap map[string]ColumnInfo, ctx *gin.Conte
 	return true
 }
 func (c *FormQuery) StrictParse(columMap map[string]ColumnInfo, ctx *gin.Context) bool {
-	for idx, _ := range c.Query {
-		item := c.Query[idx]
+	for idx, _ := range c.Where {
+		item := c.Where[idx]
 		val := ctx.PostForm(item.Name)
 		dbCol, dbOk := columMap[item.Name]
 		if dbOk {
@@ -240,15 +246,15 @@ func (c *FormQuery) StrictParse(columMap map[string]ColumnInfo, ctx *gin.Context
 					if per != nil {
 						return false
 					}
-					c.Query[idx].Val = pval
+					c.Where[idx].Val = pval
 				} else if dbCol.LangType == "float" {
 					pval, per := strconv.ParseFloat(val, 64)
 					if per != nil {
 						return false
 					}
-					c.Query[idx].Val = pval
+					c.Where[idx].Val = pval
 				} else {
-					c.Query[idx].Val = val
+					c.Where[idx].Val = val
 				}
 			} else {
 				if item.Default != nil {
@@ -256,12 +262,12 @@ func (c *FormQuery) StrictParse(columMap map[string]ColumnInfo, ctx *gin.Context
 					if dbCol.LangType == "int" {
 						titem, ok := item.Default.(float64)
 						if ok {
-							c.Query[idx].Val = int64(titem)
+							c.Where[idx].Val = int64(titem)
 						} else {
-							c.Query[idx].Val = 0
+							c.Where[idx].Val = 0
 						}
 					} else {
-						c.Query[idx].Val = item.Default
+						c.Where[idx].Val = item.Default
 					}
 				} else {
 					return false

@@ -1,4 +1,5 @@
 {
+  "mod": "company.mod.json",
   "exits": {
     "columns": [
       "com_name"

@@ -1,4 +1,5 @@
 {
+  "mod": "company.mod.json",
   "exits": {
     "columns": [
       "com_name"
@@ -11,7 +12,7 @@
     "com_desc",
     "flag"
   ],
-  "query": [
+  "where": [
     {
       "name": "id",
       "op": "eq"

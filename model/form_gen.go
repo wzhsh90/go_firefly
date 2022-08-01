@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"firefly/utils"
 	"io/ioutil"
+	"path"
 	"path/filepath"
 )
 
@@ -30,21 +31,23 @@ func ModLoadByte(jsonByte []byte) ModInfo {
 	return info
 }
 
-func FormAddLoadFile(filePath string) FormAdd {
+func FormAddLoadFile(filePath string) (FormAdd, ModInfo) {
 	if utils.PathExists(filePath) {
-		_, fileName := filepath.Split(filePath)
+		dir, fileName := filepath.Split(filePath)
 		if x, found := utils.GetCache(fileName); found {
-			return x.(FormAdd)
+			cacheInfo := x.(FormAdd)
+			return cacheInfo, ModLoadFile(path.Join(cacheInfo.Dir, cacheInfo.Mod))
 		}
 		data, err := ioutil.ReadFile(filePath)
 		if err != nil {
-			return FormAdd{}
+			return FormAdd{}, ModInfo{}
 		}
 		info := FormAddLoadByte(data)
+		info.Dir = dir
 		utils.SetCache(fileName, info)
-		return info
+		return info, ModLoadFile(path.Join(info.Dir, info.Mod))
 	} else {
-		return FormAdd{}
+		return FormAdd{}, ModInfo{}
 	}
 }
 func FormAddLoadByte(jsonByte []byte) FormAdd {
@@ -53,21 +56,23 @@ func FormAddLoadByte(jsonByte []byte) FormAdd {
 	return info
 }
 
-func FormUpdateLoadFile(filePath string) FormUpdate {
+func FormUpdateLoadFile(filePath string) (FormUpdate, ModInfo) {
 	if utils.PathExists(filePath) {
-		_, fileName := filepath.Split(filePath)
+		dir, fileName := filepath.Split(filePath)
 		if x, found := utils.GetCache(fileName); found {
-			return x.(FormUpdate)
+			cacheInfo := x.(FormUpdate)
+			return cacheInfo, ModLoadFile(path.Join(cacheInfo.Dir, cacheInfo.Mod))
 		}
 		data, err := ioutil.ReadFile(filePath)
 		if err != nil {
-			return FormUpdate{}
+			return FormUpdate{}, ModInfo{}
 		}
 		info := FormUpdateLoadByte(data)
+		info.Dir = dir
 		utils.SetCache(fileName, info)
-		return info
+		return info, ModLoadFile(path.Join(info.Dir, info.Mod))
 	} else {
-		return FormUpdate{}
+		return FormUpdate{}, ModInfo{}
 	}
 }
 func FormUpdateLoadByte(jsonByte []byte) FormUpdate {
@@ -76,21 +81,23 @@ func FormUpdateLoadByte(jsonByte []byte) FormUpdate {
 	return info
 }
 
-func FormQueryLoadFile(filePath string) FormQuery {
+func FormQueryLoadFile(filePath string) (FormQuery, ModInfo) {
 	if utils.PathExists(filePath) {
-		_, fileName := filepath.Split(filePath)
+		dir, fileName := filepath.Split(filePath)
 		if x, found := utils.GetCache(fileName); found {
-			return x.(FormQuery)
+			cacheInfo := x.(FormQuery)
+			return cacheInfo, ModLoadFile(path.Join(cacheInfo.Dir, cacheInfo.Mod))
 		}
 		data, err := ioutil.ReadFile(filePath)
 		if err != nil {
-			return FormQuery{}
+			return FormQuery{}, ModInfo{}
 		}
 		info := FormQueryLoadByte(data)
+		info.Dir = dir
 		utils.SetCache(fileName, info)
-		return info
+		return info, ModLoadFile(path.Join(info.Dir, info.Mod))
 	} else {
-		return FormQuery{}
+		return FormQuery{}, ModInfo{}
 	}
 }
 func FormQueryLoadByte(jsonByte []byte) FormQuery {

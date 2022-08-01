@@ -1,5 +1,6 @@
 {
-  "query": [
+  "mod": "company.mod.json",
+  "where": [
     {
       "name": "id",
       "op": "eq"
