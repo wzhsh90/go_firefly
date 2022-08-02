@@ -14,6 +14,10 @@ type BaseController struct {
 
 func (c *BaseController) List(ctx *gin.Context) {
 	crudInfo := models.LoadCrudFile(crudJson)
+	if crudInfo.List.Disable {
+		ctx.String(200, "未启用查询,请检查配置文件")
+		return
+	}
 	pageIndex := utils.ParseInt(ctx.PostForm("pageIndex"))
 	pageSize := utils.ParseInt(ctx.PostForm("pageSize"))
 	columMap := crudInfo.Mod.Columns
@@ -29,6 +33,10 @@ func (c *BaseController) Add(ctx *gin.Context) {
 	var rest = models.RestResult{}
 	rest.Code = 1
 	crudInfo := models.LoadCrudFile(crudJson)
+	if crudInfo.Add.Disable {
+		ctx.String(200, "未启用新增,请检查配置文件")
+		return
+	}
 	columMap := crudInfo.Mod.Columns
 	_, dbData, validResp := crudInfo.Add.GetFormData(columMap, ctx, true)
 	if !validResp.Valid {
@@ -63,6 +71,10 @@ func (c *BaseController) Update(ctx *gin.Context) {
 	var rest = models.RestResult{}
 	rest.Code = 1
 	crudInfo := models.LoadCrudFile(crudJson)
+	if crudInfo.Update.Disable {
+		ctx.String(200, "未启用修改,请检查配置文件")
+		return
+	}
 	columMap := crudInfo.Mod.Columns
 	formData, dbData, validResp := crudInfo.Update.GetFormData(columMap, ctx, false)
 	if !validResp.Valid {
@@ -119,6 +131,10 @@ func (c *BaseController) Del(ctx *gin.Context) {
 	var rest = models.RestResult{}
 	rest.Code = 1
 	crudInfo := models.LoadCrudFile(crudJson)
+	if crudInfo.Del.Disable {
+		ctx.String(200, "未启用删除,请检查配置文件")
+		return
+	}
 	columMap := crudInfo.Mod.Columns
 	valid := crudInfo.Del.StrictParse(columMap, ctx)
 	if !valid {
@@ -133,7 +149,7 @@ func (c *BaseController) Del(ctx *gin.Context) {
 			return
 		}
 	}
-	if !crudInfo.Del.Fake {
+	if crudInfo.Del.Physic {
 		db, _ := dao.DelSql(crudInfo.Mod.Table.Name, crudInfo.Del.Where)
 		if db == 1 {
 			rest.Code = 0
@@ -146,7 +162,7 @@ func (c *BaseController) Del(ctx *gin.Context) {
 		dbData := map[string]interface{}{
 			"del_flag": 1,
 		}
-		db, _ := dao.UpdateSql(crudInfo.Mod.Table.Name, crudInfo.Del.Where, dbData)
+		db, _ := dao.UpdateSql(crudInfo.Mod.Table.Name, crudInfo.Update.Where, dbData)
 		if db == 1 {
 			rest.Code = 0
 			rest.Message = "删除成功"

@@ -15,6 +15,13 @@ type CurdInfo struct {
 	Del    FormDel    `json:"del"`
 }
 
+func (c *CurdInfo) IsEnable() {
+	c.Del.IsEnable()
+	c.List.IsEnable()
+	c.Add.IsEnable()
+	c.Update.IsEnable()
+}
+
 func LoadCrudFile(filePath string) CurdInfo {
 	if utils.PathExists(filePath) {
 		_, fileName := filepath.Split(filePath)
@@ -35,5 +42,6 @@ func LoadCrudFile(filePath string) CurdInfo {
 func LoadCrudByte(jsonByte []byte) CurdInfo {
 	var info CurdInfo
 	json.Unmarshal(jsonByte, &info)
+	info.IsEnable()
 	return info
 }

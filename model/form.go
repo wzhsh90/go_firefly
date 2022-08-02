@@ -41,6 +41,7 @@ type ColumnInfo struct {
 }
 type FormInfo struct {
 	Columns map[string]FormField `json:"columns"`
+	Opt
 }
 
 type FormField struct {
@@ -168,17 +169,21 @@ func (c *FormInfo) GetFormData(columMap map[string]ColumnInfo, ctx *gin.Context,
 }
 
 type FormDel struct {
-	Fake bool `json:"fake"`
+	Physic bool `json:"physic"`
 	FormQuery
+	Opt
 }
+
 type FormQuery struct {
 	Select []string `json:"select"`
 	Where  []FormOp `json:"where"`
 	Order  string   `json:"order"`
+	Opt
 }
 type FormUpdate struct {
 	FormInfo
 	FormQuery
+	Opt
 }
 
 type FormUnique struct {
@@ -303,4 +308,29 @@ func (c *FormOp) ExpOn() bool {
 		expFlag = true
 	}
 	return expFlag
+}
+
+type Opt struct {
+	Disable bool `json:"disable"`
+}
+
+func (d *FormInfo) IsEnable() {
+	if d.Columns == nil {
+		d.Opt.Disable = true
+	}
+}
+func (d *FormQuery) IsEnable() {
+	if d.Select == nil {
+		d.Opt.Disable = true
+	}
+}
+func (d *FormUpdate) IsEnable() {
+	if d.Where == nil {
+		d.Opt.Disable = true
+	}
+}
+func (d *FormDel) IsEnable() {
+	if d.Where == nil {
+		d.Opt.Disable = true
+	}
 }
