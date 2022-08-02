@@ -26,7 +26,7 @@ func (c *BaseController) List(ctx *gin.Context) {
 		ctx.String(200, "数据不合法")
 		return
 	}
-	tableJson := dao.PageSql(crudInfo.Mod.Table.Name, crudInfo.List.Where, crudInfo.List.Select, crudInfo.List.Order, pageIndex, pageSize)
+	tableJson := dao.PageSql(crudInfo.Mod.Table.Name, crudInfo.List, pageIndex, pageSize)
 	ctx.JSON(200, tableJson)
 }
 func (c *BaseController) Add(ctx *gin.Context) {
@@ -149,7 +149,8 @@ func (c *BaseController) Del(ctx *gin.Context) {
 			return
 		}
 	}
-	if crudInfo.Del.Physic {
+	//真删除
+	if !crudInfo.Del.Fake {
 		db, _ := dao.DelSql(crudInfo.Mod.Table.Name, crudInfo.Del.Where)
 		if db == 1 {
 			rest.Code = 0
@@ -159,6 +160,7 @@ func (c *BaseController) Del(ctx *gin.Context) {
 		}
 
 	} else {
+		//假删除
 		dbData := map[string]interface{}{
 			"del_flag": 1,
 		}

@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"strconv"
+	"strings"
 )
 
 var validate = validator.New()
@@ -41,7 +42,6 @@ type ColumnInfo struct {
 }
 type FormInfo struct {
 	Columns map[string]FormField `json:"columns"`
-	Opt
 }
 
 type FormField struct {
@@ -168,34 +168,50 @@ func (c *FormInfo) GetFormData(columMap map[string]ColumnInfo, ctx *gin.Context,
 	}
 }
 
-type FormDel struct {
-	Physic bool `json:"physic"`
-	FormQuery
+type FormAdd struct {
 	Opt
+	FormInfo
 }
 
+func (c *FormAdd) IsEnable() {
+	if c.Columns == nil {
+		c.Opt.Disable = true
+	}
+}
+
+type FormList struct {
+	From string `json:"from"`
+	FormQuery
+}
+
+func (c *FormList) IsEnable() {
+	if c.Select == nil {
+		c.Opt.Disable = true
+	}
+	c.whereParse()
+}
+
+type FormDel struct {
+	Fake bool `json:"fake"`
+	FormQuery
+}
 type FormQuery struct {
+	Opt
 	Select []string `json:"select"`
 	Where  []FormOp `json:"where"`
 	Order  string   `json:"order"`
-	Opt
-}
-type FormUpdate struct {
-	FormInfo
-	FormQuery
-	Opt
 }
 
-type FormUnique struct {
-	Columns []string `json:"columns"`
-	Tip     string   `json:"tip"`
+func (c *FormQuery) whereParse() {
+	for idx, _ := range c.Where {
+		c.Where[idx].FormatName()
+	}
 }
-
 func (c *FormQuery) UnStrictParse(columMap map[string]ColumnInfo, ctx *gin.Context) bool {
 	for idx, _ := range c.Where {
 		item := c.Where[idx]
-		val := ctx.PostForm(item.Name)
-		dbCol, dbOk := columMap[item.Name]
+		val := ctx.PostForm(item.PlainName)
+		dbCol, dbOk := columMap[item.PlainName]
 		if dbOk {
 			if val != "" {
 				if dbCol.LangType == "int" {
@@ -240,8 +256,8 @@ func (c *FormQuery) UnStrictParse(columMap map[string]ColumnInfo, ctx *gin.Conte
 func (c *FormQuery) StrictParse(columMap map[string]ColumnInfo, ctx *gin.Context) bool {
 	for idx, _ := range c.Where {
 		item := c.Where[idx]
-		val := ctx.PostForm(item.Name)
-		dbCol, dbOk := columMap[item.Name]
+		val := ctx.PostForm(item.PlainName)
+		dbCol, dbOk := columMap[item.PlainName]
 		if dbOk {
 			if val != "" {
 				if dbCol.LangType == "int" {
@@ -283,19 +299,66 @@ func (c *FormQuery) StrictParse(columMap map[string]ColumnInfo, ctx *gin.Context
 	return true
 }
 
-type FormOp struct {
-	Name    string      `json:"name"`
-	Op      string      `json:"op"`
-	On      string      `json:"on"`
-	Val     interface{} `json:"-"`
-	Default interface{} `json:"default"`
+type FormUpdate struct {
+	FormInfo
+	FormQuery
 }
 
+func (c *FormUpdate) IsEnable() {
+	if c.Where == nil {
+		c.Opt.Disable = true
+	}
+	c.whereParse()
+}
+
+type Opt struct {
+	Disable bool `json:"disable"`
+}
+
+func (c *FormDel) IsEnable() {
+	if c.Where == nil {
+		c.Opt.Disable = true
+	}
+	c.whereParse()
+}
+
+type FormUnique struct {
+	Columns []string `json:"columns"`
+	Tip     string   `json:"tip"`
+}
+
+type FormOp struct {
+	Name      string      `json:"name"`
+	Prefix    string      `json:"-"`
+	PlainName string      `json:"-"`
+	Op        string      `json:"op"`
+	On        string      `json:"on"`
+	Val       interface{} `json:"-"`
+	Default   interface{} `json:"default"`
+}
+
+func (c *FormOp) FormatName() {
+	if strings.Contains(c.Name, ".") {
+		nameList := strings.Split(c.Name, ".")
+		c.Prefix = nameList[0]
+		lastName := nameList[len(nameList)-1]
+		c.PlainName = lastName
+	} else {
+		c.PlainName = c.Name
+	}
+}
 func (c *FormOp) ExpOn() bool {
 	expFlag := false
 	if c.On != "" {
-		env := map[string]interface{}{
-			c.Name: c.Val,
+		env := make(map[string]interface{})
+		if strings.Contains(c.Name, ".") {
+			//将plain_name 也放一次，防止条件中缺少前缀
+			env[c.PlainName] = c.Val
+			env[c.Prefix] = map[string]interface{}{
+				c.PlainName: c.Val,
+			}
+		} else {
+			env[c.PlainName] = c.Val
 		}
 		program, err := expr.Compile(c.On, expr.Env(env), expr.AsBool())
 		if err == nil {
@@ -308,29 +371,4 @@ func (c *FormOp) ExpOn() bool {
 		expFlag = true
 	}
 	return expFlag
-}
-
-type Opt struct {
-	Disable bool `json:"disable"`
-}
-
-func (d *FormInfo) IsEnable() {
-	if d.Columns == nil {
-		d.Opt.Disable = true
-	}
-}
-func (d *FormQuery) IsEnable() {
-	if d.Select == nil {
-		d.Opt.Disable = true
-	}
-}
-func (d *FormUpdate) IsEnable() {
-	if d.Where == nil {
-		d.Opt.Disable = true
-	}
-}
-func (d *FormDel) IsEnable() {
-	if d.Where == nil {
-		d.Opt.Disable = true
-	}
 }

@@ -37,18 +37,18 @@
     }
   },
   "list": {
-    "sql": "",
     "select": [
       "id",
       "com_name",
       "com_desc",
       "flag"
     ],
+    "from": "sys_company_t det",
     "where": [
       {
-        "name": "com_name",
+        "name": "det.com_name",
         "op": "like",
-        "on": "len(com_name)!=0"
+        "on": "len(det.com_name)!=0"
       },
       {
         "name": "flag",
