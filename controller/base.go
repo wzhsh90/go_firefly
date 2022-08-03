@@ -13,8 +13,8 @@ type BaseController struct {
 }
 
 func (c *BaseController) List(ctx *gin.Context) {
-	opeKey, done := c.checkOpeKey(ctx)
-	if done {
+	opeKey, ok := c.checkOpeKey(ctx.PostForm("opeKey"))
+	if ok {
 		return
 	}
 	crudInfo := models.LoadCrudFile(crudJson)
@@ -35,17 +35,15 @@ func (c *BaseController) List(ctx *gin.Context) {
 	ctx.JSON(200, tableJson)
 }
 
-func (c *BaseController) checkOpeKey(ctx *gin.Context) (string, bool) {
-	opeKey := ctx.PostForm("opeKey")
+func (c *BaseController) checkOpeKey(opeKey string) (string, bool) {
 	if len(opeKey) <= 0 {
-		ctx.String(200, "未启用查询,请检查配置文件")
-		return "", true
+		return "未启用查询,请检查配置文件", true
 	}
 	return opeKey, false
 }
 func (c *BaseController) Add(ctx *gin.Context) {
-	opeKey, done := c.checkOpeKey(ctx)
-	if done {
+	opeKey, ok := c.checkOpeKey(ctx.PostForm("opeKey"))
+	if ok {
 		return
 	}
 	var rest = models.RestResult{}
@@ -88,8 +86,8 @@ func (c *BaseController) Add(ctx *gin.Context) {
 	ctx.JSON(200, rest)
 }
 func (c *BaseController) Update(ctx *gin.Context) {
-	opeKey, done := c.checkOpeKey(ctx)
-	if done {
+	opeKey, ok := c.checkOpeKey(ctx.PostForm("opeKey"))
+	if ok {
 		return
 	}
 	var rest = models.RestResult{}
@@ -153,8 +151,8 @@ func (c *BaseController) Update(ctx *gin.Context) {
 	ctx.JSON(200, rest)
 }
 func (c *BaseController) Del(ctx *gin.Context) {
-	opeKey, done := c.checkOpeKey(ctx)
-	if done {
+	opeKey, ok := c.checkOpeKey(ctx.PostForm("opeKey"))
+	if ok {
 		return
 	}
 	var rest = models.RestResult{}
