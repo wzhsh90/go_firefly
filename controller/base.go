@@ -13,12 +13,12 @@ type BaseController struct {
 }
 
 func (c *BaseController) List(ctx *gin.Context) {
-	busi, ok := c.checkBusi(ctx.PostForm("busi"))
+	dml, ok := c.existAndGet(ctx.PostForm("dml"))
 	if ok {
 		return
 	}
 	crudInfo := models.LoadCrudFile(crudJson)
-	list := crudInfo.List[busi]
+	list := crudInfo.List[dml]
 	if list.Disable {
 		ctx.String(200, "未启用查询,请检查配置文件")
 		return
@@ -35,21 +35,21 @@ func (c *BaseController) List(ctx *gin.Context) {
 	ctx.JSON(200, tableJson)
 }
 
-func (c *BaseController) checkBusi(busi string) (string, bool) {
-	if len(busi) <= 0 {
+func (c *BaseController) existAndGet(dml string) (string, bool) {
+	if len(dml) <= 0 {
 		return "未启用查询,请检查配置文件", true
 	}
-	return busi, false
+	return dml, false
 }
 func (c *BaseController) Add(ctx *gin.Context) {
-	busi, ok := c.checkBusi(ctx.PostForm("busi"))
+	dml, ok := c.existAndGet(ctx.PostForm("dml"))
 	if ok {
 		return
 	}
 	var rest = models.RestResult{}
 	rest.Code = 1
 	crudInfo := models.LoadCrudFile(crudJson)
-	add := crudInfo.Add[busi]
+	add := crudInfo.Add[dml]
 	if add.Disable {
 		ctx.String(200, "未启用新增,请检查配置文件")
 		return
@@ -86,14 +86,14 @@ func (c *BaseController) Add(ctx *gin.Context) {
 	ctx.JSON(200, rest)
 }
 func (c *BaseController) Update(ctx *gin.Context) {
-	busi, ok := c.checkBusi(ctx.PostForm("busi"))
+	dml, ok := c.existAndGet(ctx.PostForm("dml"))
 	if ok {
 		return
 	}
 	var rest = models.RestResult{}
 	rest.Code = 1
 	crudInfo := models.LoadCrudFile(crudJson)
-	update := crudInfo.Update[busi]
+	update := crudInfo.Update[dml]
 	if update.Disable {
 		ctx.String(200, "未启用修改,请检查配置文件")
 		return
@@ -151,14 +151,14 @@ func (c *BaseController) Update(ctx *gin.Context) {
 	ctx.JSON(200, rest)
 }
 func (c *BaseController) Del(ctx *gin.Context) {
-	busi, ok := c.checkBusi(ctx.PostForm("busi"))
+	dml, ok := c.existAndGet(ctx.PostForm("dml"))
 	if ok {
 		return
 	}
 	var rest = models.RestResult{}
 	rest.Code = 1
 	crudInfo := models.LoadCrudFile(crudJson)
-	del := crudInfo.Del[busi]
+	del := crudInfo.Del[dml]
 	if del.Disable {
 		ctx.String(200, "未启用删除,请检查配置文件")
 		return
