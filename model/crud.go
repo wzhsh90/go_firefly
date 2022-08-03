@@ -15,33 +15,32 @@ type CurdInfo struct {
 	Del    FormDel    `json:"del"`
 }
 
-func (c *CurdInfo) checkEnable() {
-	c.Del.IsEnable()
-	c.List.IsEnable()
-	c.Add.IsEnable()
-	c.Update.IsEnable()
+func (c *CurdInfo) checkDisable() {
+	c.Del.checkDisable()
+	c.List.checkDisable()
+	c.Add.checkDisable()
+	c.Update.checkDisable()
 }
 
 func LoadCrudFile(filePath string) CurdInfo {
-	if utils.PathExists(filePath) {
-		_, fileName := filepath.Split(filePath)
-		if x, found := utils.GetCache(fileName); found {
-			return x.(CurdInfo)
-		}
-		data, err := ioutil.ReadFile(filePath)
-		if err != nil {
-			return CurdInfo{}
-		}
-		info := LoadCrudByte(data)
-		utils.SetCache(fileName, info)
-		return info
-	} else {
+	if !utils.PathExists(filePath) {
 		return CurdInfo{}
 	}
+	_, fileName := filepath.Split(filePath)
+	if x, found := utils.GetCache(fileName); found {
+		return x.(CurdInfo)
+	}
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return CurdInfo{}
+	}
+	info := LoadCrudByte(data)
+	utils.SetCache(fileName, info)
+	return info
 }
 func LoadCrudByte(jsonByte []byte) CurdInfo {
 	var info CurdInfo
 	json.Unmarshal(jsonByte, &info)
-	info.checkEnable()
+	info.checkDisable()
 	return info
 }

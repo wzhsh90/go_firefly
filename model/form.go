@@ -173,7 +173,7 @@ type FormAdd struct {
 	FormInfo
 }
 
-func (c *FormAdd) IsEnable() {
+func (c *FormAdd) checkDisable() {
 	if len(c.Columns) > 0 {
 		c.Opt.Disable = true
 	}
@@ -184,7 +184,7 @@ type FormList struct {
 	FormQuery
 }
 
-func (c *FormList) IsEnable() {
+func (c *FormList) checkDisable() {
 	if len(c.Select) > 0 {
 		c.Opt.Disable = true
 	} else {
@@ -302,7 +302,7 @@ type FormUpdate struct {
 	FormQuery
 }
 
-func (c *FormUpdate) IsEnable() {
+func (c *FormUpdate) checkDisable() {
 	if len(c.Where) > 0 {
 		c.Opt.Disable = true
 	} else {
@@ -314,7 +314,7 @@ type Opt struct {
 	Disable bool `json:"disable"`
 }
 
-func (c *FormDel) IsEnable() {
+func (c *FormDel) checkDisable() {
 	if len(c.Where) > 0 {
 		c.Opt.Disable = true
 	} else {
