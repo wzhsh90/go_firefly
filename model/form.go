@@ -187,8 +187,9 @@ type FormList struct {
 func (c *FormList) IsEnable() {
 	if c.Select == nil {
 		c.Opt.Disable = true
+	} else {
+		c.whereParse()
 	}
-	c.whereParse()
 }
 
 type FormDel struct {
@@ -212,43 +213,41 @@ func (c *FormQuery) UnStrictParse(columMap map[string]ColumnInfo, ctx *gin.Conte
 		item := c.Where[idx]
 		val := ctx.PostForm(item.PlainName)
 		dbCol, dbOk := columMap[item.PlainName]
-		if dbOk {
-			if val != "" {
+		if !dbOk {
+			return false
+		}
+		if val != "" {
+			if dbCol.LangType == "int" {
+				pval, per := strconv.ParseInt(val, 10, 64)
+				if per != nil {
+					pval = 0
+				}
+				c.Where[idx].Val = pval
+			} else if dbCol.LangType == "float" {
+				pval, per := strconv.ParseFloat(val, 64)
+				if per != nil {
+					pval = 0
+				}
+				c.Where[idx].Val = pval
+			} else {
+				c.Where[idx].Val = val
+			}
+		} else {
+			if item.Default != nil {
+				//处理json string 里面是int 但unmarshal 后为float
 				if dbCol.LangType == "int" {
-					pval, per := strconv.ParseInt(val, 10, 64)
-					if per != nil {
-						pval = 0
+					titem, ok := item.Default.(float64)
+					if ok {
+						c.Where[idx].Val = int64(titem)
+					} else {
+						c.Where[idx].Val = 0
 					}
-					c.Where[idx].Val = pval
-				} else if dbCol.LangType == "float" {
-					pval, per := strconv.ParseFloat(val, 64)
-					if per != nil {
-						pval = 0
-					}
-					c.Where[idx].Val = pval
 				} else {
-					c.Where[idx].Val = val
+					c.Where[idx].Val = item.Default
 				}
 			} else {
-				if item.Default != nil {
-					//处理json string 里面是int 但unmarshal 后为float
-					if dbCol.LangType == "int" {
-						titem, ok := item.Default.(float64)
-						if ok {
-							c.Where[idx].Val = int64(titem)
-						} else {
-							c.Where[idx].Val = 0
-						}
-					} else {
-						c.Where[idx].Val = item.Default
-					}
-				} else {
-					c.Where[idx].Val = ""
-				}
+				c.Where[idx].Val = ""
 			}
-
-		} else {
-			return false
 		}
 	}
 	return true
@@ -258,42 +257,41 @@ func (c *FormQuery) StrictParse(columMap map[string]ColumnInfo, ctx *gin.Context
 		item := c.Where[idx]
 		val := ctx.PostForm(item.PlainName)
 		dbCol, dbOk := columMap[item.PlainName]
-		if dbOk {
-			if val != "" {
-				if dbCol.LangType == "int" {
-					pval, per := strconv.ParseInt(val, 10, 64)
-					if per != nil {
-						return false
-					}
-					c.Where[idx].Val = pval
-				} else if dbCol.LangType == "float" {
-					pval, per := strconv.ParseFloat(val, 64)
-					if per != nil {
-						return false
-					}
-					c.Where[idx].Val = pval
-				} else {
-					c.Where[idx].Val = val
-				}
-			} else {
-				if item.Default != nil {
-					//处理json string 里面是int 但unmarshal 后为float
-					if dbCol.LangType == "int" {
-						titem, ok := item.Default.(float64)
-						if ok {
-							c.Where[idx].Val = int64(titem)
-						} else {
-							c.Where[idx].Val = 0
-						}
-					} else {
-						c.Where[idx].Val = item.Default
-					}
-				} else {
+		if !dbOk {
+			return false
+		}
+		if val != "" {
+			if dbCol.LangType == "int" {
+				pval, per := strconv.ParseInt(val, 10, 64)
+				if per != nil {
 					return false
 				}
+				c.Where[idx].Val = pval
+			} else if dbCol.LangType == "float" {
+				pval, per := strconv.ParseFloat(val, 64)
+				if per != nil {
+					return false
+				}
+				c.Where[idx].Val = pval
+			} else {
+				c.Where[idx].Val = val
 			}
 		} else {
-			return false
+			if item.Default != nil {
+				//处理json string 里面是int 但unmarshal 后为float
+				if dbCol.LangType == "int" {
+					titem, ok := item.Default.(float64)
+					if ok {
+						c.Where[idx].Val = int64(titem)
+					} else {
+						c.Where[idx].Val = 0
+					}
+				} else {
+					c.Where[idx].Val = item.Default
+				}
+			} else {
+				return false
+			}
 		}
 	}
 	return true
@@ -307,8 +305,9 @@ type FormUpdate struct {
 func (c *FormUpdate) IsEnable() {
 	if c.Where == nil {
 		c.Opt.Disable = true
+	} else {
+		c.whereParse()
 	}
-	c.whereParse()
 }
 
 type Opt struct {
@@ -318,8 +317,9 @@ type Opt struct {
 func (c *FormDel) IsEnable() {
 	if c.Where == nil {
 		c.Opt.Disable = true
+	} else {
+		c.whereParse()
 	}
-	c.whereParse()
 }
 
 type FormUnique struct {
