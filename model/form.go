@@ -351,14 +351,11 @@ func (c *FormOp) ExpOn() bool {
 	expFlag := false
 	if c.On != "" {
 		env := make(map[string]interface{})
-		if strings.Contains(c.Name, ".") {
-			//将plain_name 也放一次，防止条件中缺少前缀
-			env[c.PlainName] = c.Val
+		env[c.PlainName] = c.Val
+		if c.Prefix != "" {
 			env[c.Prefix] = map[string]interface{}{
 				c.PlainName: c.Val,
 			}
-		} else {
-			env[c.PlainName] = c.Val
 		}
 		program, err := expr.Compile(c.On, expr.Env(env), expr.AsBool())
 		if err == nil {
