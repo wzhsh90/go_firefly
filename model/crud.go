@@ -16,25 +16,17 @@ type CurdInfo struct {
 }
 
 func (c *CurdInfo) checkDisable() {
-	if len(c.Update) > 0 {
-		for _, v := range c.Update {
-			v.checkDisable()
-		}
+	for _, v := range c.Update {
+		v.checkDisable()
 	}
-	if len(c.List) > 0 {
-		for _, v := range c.List {
-			v.checkDisable()
-		}
+	for _, v := range c.List {
+		v.checkDisable()
 	}
-	if len(c.Del) > 0 {
-		for _, v := range c.Del {
-			v.checkDisable()
-		}
+	for _, v := range c.Del {
+		v.checkDisable()
 	}
-	if len(c.Add) > 0 {
-		for _, v := range c.Add {
-			v.checkDisable()
-		}
+	for _, v := range c.Add {
+		v.checkDisable()
 	}
 }
 

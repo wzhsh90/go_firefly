@@ -13,12 +13,12 @@ type BaseController struct {
 }
 
 func (c *BaseController) List(ctx *gin.Context) {
-	opeKey, ok := c.checkOpeKey(ctx.PostForm("opeKey"))
+	busi, ok := c.checkBusi(ctx.PostForm("busi"))
 	if ok {
 		return
 	}
 	crudInfo := models.LoadCrudFile(crudJson)
-	list := crudInfo.List[opeKey]
+	list := crudInfo.List[busi]
 	if list.Disable {
 		ctx.String(200, "未启用查询,请检查配置文件")
 		return
@@ -35,21 +35,21 @@ func (c *BaseController) List(ctx *gin.Context) {
 	ctx.JSON(200, tableJson)
 }
 
-func (c *BaseController) checkOpeKey(opeKey string) (string, bool) {
-	if len(opeKey) <= 0 {
+func (c *BaseController) checkBusi(busi string) (string, bool) {
+	if len(busi) <= 0 {
 		return "未启用查询,请检查配置文件", true
 	}
-	return opeKey, false
+	return busi, false
 }
 func (c *BaseController) Add(ctx *gin.Context) {
-	opeKey, ok := c.checkOpeKey(ctx.PostForm("opeKey"))
+	busi, ok := c.checkBusi(ctx.PostForm("busi"))
 	if ok {
 		return
 	}
 	var rest = models.RestResult{}
 	rest.Code = 1
 	crudInfo := models.LoadCrudFile(crudJson)
-	add := crudInfo.Add[opeKey]
+	add := crudInfo.Add[busi]
 	if add.Disable {
 		ctx.String(200, "未启用新增,请检查配置文件")
 		return
@@ -86,14 +86,14 @@ func (c *BaseController) Add(ctx *gin.Context) {
 	ctx.JSON(200, rest)
 }
 func (c *BaseController) Update(ctx *gin.Context) {
-	opeKey, ok := c.checkOpeKey(ctx.PostForm("opeKey"))
+	busi, ok := c.checkBusi(ctx.PostForm("busi"))
 	if ok {
 		return
 	}
 	var rest = models.RestResult{}
 	rest.Code = 1
 	crudInfo := models.LoadCrudFile(crudJson)
-	update := crudInfo.Update[opeKey]
+	update := crudInfo.Update[busi]
 	if update.Disable {
 		ctx.String(200, "未启用修改,请检查配置文件")
 		return
@@ -151,14 +151,14 @@ func (c *BaseController) Update(ctx *gin.Context) {
 	ctx.JSON(200, rest)
 }
 func (c *BaseController) Del(ctx *gin.Context) {
-	opeKey, ok := c.checkOpeKey(ctx.PostForm("opeKey"))
+	busi, ok := c.checkBusi(ctx.PostForm("busi"))
 	if ok {
 		return
 	}
 	var rest = models.RestResult{}
 	rest.Code = 1
 	crudInfo := models.LoadCrudFile(crudJson)
-	del := crudInfo.Del[opeKey]
+	del := crudInfo.Del[busi]
 	if del.Disable {
 		ctx.String(200, "未启用删除,请检查配置文件")
 		return
