@@ -13,32 +13,52 @@ type BaseController struct {
 }
 
 func (c *BaseController) List(ctx *gin.Context) {
+	opeKey, done := c.checkOpeKey(ctx)
+	if done {
+		return
+	}
 	crudInfo := models.LoadCrudFile(crudJson)
-	if crudInfo.List.Disable {
+	list := crudInfo.List[opeKey]
+	if list.Disable {
 		ctx.String(200, "未启用查询,请检查配置文件")
 		return
 	}
 	pageIndex := utils.ParseInt(ctx.PostForm("pageIndex"))
 	pageSize := utils.ParseInt(ctx.PostForm("pageSize"))
 	columMap := crudInfo.Mod.Columns
-	valid := crudInfo.List.UnStrictParse(columMap, ctx)
+	valid := list.UnStrictParse(columMap, ctx)
 	if !valid {
 		ctx.String(200, "数据不合法")
 		return
 	}
-	tableJson := dao.PageSql(crudInfo.Mod.Table.Name, crudInfo.List, pageIndex, pageSize)
+	tableJson := dao.PageSql(crudInfo.Mod.Table.Name, list, pageIndex, pageSize)
 	ctx.JSON(200, tableJson)
 }
+
+func (c *BaseController) checkOpeKey(ctx *gin.Context) (string, bool) {
+	opeKey := ctx.PostForm("opeKey")
+	if len(opeKey) <= 0 {
+		ctx.String(200, "未启用查询,请检查配置文件")
+		return "", true
+	}
+	return opeKey, false
+}
 func (c *BaseController) Add(ctx *gin.Context) {
+	opeKey, done := c.checkOpeKey(ctx)
+	if done {
+		return
+	}
 	var rest = models.RestResult{}
 	rest.Code = 1
 	crudInfo := models.LoadCrudFile(crudJson)
-	if crudInfo.Add.Disable {
+	add := crudInfo.Add[opeKey]
+	if add.Disable {
 		ctx.String(200, "未启用新增,请检查配置文件")
 		return
 	}
 	columMap := crudInfo.Mod.Columns
-	_, dbData, validResp := crudInfo.Add.GetFormData(columMap, ctx, true)
+
+	_, dbData, validResp := add.GetFormData(columMap, ctx, true)
 	if !validResp.Valid {
 		rest.Message = validResp.Msg
 		ctx.JSON(200, rest)
@@ -68,26 +88,31 @@ func (c *BaseController) Add(ctx *gin.Context) {
 	ctx.JSON(200, rest)
 }
 func (c *BaseController) Update(ctx *gin.Context) {
+	opeKey, done := c.checkOpeKey(ctx)
+	if done {
+		return
+	}
 	var rest = models.RestResult{}
 	rest.Code = 1
 	crudInfo := models.LoadCrudFile(crudJson)
-	if crudInfo.Update.Disable {
+	update := crudInfo.Update[opeKey]
+	if update.Disable {
 		ctx.String(200, "未启用修改,请检查配置文件")
 		return
 	}
 	columMap := crudInfo.Mod.Columns
-	formData, dbData, validResp := crudInfo.Update.GetFormData(columMap, ctx, false)
+	formData, dbData, validResp := update.GetFormData(columMap, ctx, false)
 	if !validResp.Valid {
 		rest.Message = validResp.Msg
 		ctx.JSON(200, rest)
 		return
 	}
-	valid := crudInfo.Update.StrictParse(columMap, ctx)
+	valid := update.StrictParse(columMap, ctx)
 	if !valid {
 		rest.Message = "数据不合法"
 		ctx.JSON(200, rest)
 	}
-	orgInfo := dao.GetColSql(crudInfo.Mod.Table.Name, crudInfo.Update.Where, crudInfo.Update.Select)
+	orgInfo := dao.GetColSql(crudInfo.Mod.Table.Name, update.Where, update.Select)
 	if len(orgInfo) == 0 {
 		rest.Message = "数据获取失败或已不存在"
 		ctx.JSON(200, rest)
@@ -118,7 +143,7 @@ func (c *BaseController) Update(ctx *gin.Context) {
 			}
 		}
 	}
-	_, serr := dao.UpdateSql(crudInfo.Mod.Table.Name, crudInfo.Update.Where, dbData)
+	_, serr := dao.UpdateSql(crudInfo.Mod.Table.Name, update.Where, dbData)
 	if serr == nil {
 		rest.Code = 0
 		rest.Message = "修改成功"
@@ -128,21 +153,26 @@ func (c *BaseController) Update(ctx *gin.Context) {
 	ctx.JSON(200, rest)
 }
 func (c *BaseController) Del(ctx *gin.Context) {
+	opeKey, done := c.checkOpeKey(ctx)
+	if done {
+		return
+	}
 	var rest = models.RestResult{}
 	rest.Code = 1
 	crudInfo := models.LoadCrudFile(crudJson)
-	if crudInfo.Del.Disable {
+	del := crudInfo.Del[opeKey]
+	if del.Disable {
 		ctx.String(200, "未启用删除,请检查配置文件")
 		return
 	}
 	columMap := crudInfo.Mod.Columns
-	valid := crudInfo.Del.StrictParse(columMap, ctx)
+	valid := del.StrictParse(columMap, ctx)
 	if !valid {
 		rest.Message = "数据不合法"
 		ctx.JSON(200, rest)
 	}
-	if len(crudInfo.Del.Select) != 0 {
-		orgInfo := dao.GetColSql(crudInfo.Mod.Table.Name, crudInfo.Del.Where, crudInfo.Del.Select)
+	if len(del.Select) != 0 {
+		orgInfo := dao.GetColSql(crudInfo.Mod.Table.Name, del.Where, del.Select)
 		if len(orgInfo) == 0 {
 			rest.Message = "数据获取失败或已不存在"
 			ctx.JSON(200, rest)
@@ -150,8 +180,8 @@ func (c *BaseController) Del(ctx *gin.Context) {
 		}
 	}
 	//真删除
-	if !crudInfo.Del.Fake {
-		db, _ := dao.DelSql(crudInfo.Mod.Table.Name, crudInfo.Del.Where)
+	if !del.Fake {
+		db, _ := dao.DelSql(crudInfo.Mod.Table.Name, del.Where)
 		if db == 1 {
 			rest.Code = 0
 			rest.Message = "删除成功"
@@ -164,7 +194,8 @@ func (c *BaseController) Del(ctx *gin.Context) {
 		dbData := map[string]interface{}{
 			"del_flag": 1,
 		}
-		db, _ := dao.UpdateSql(crudInfo.Mod.Table.Name, crudInfo.Update.Where, dbData)
+		//db, _ := dao.UpdateSql(crudInfo.Mod.Table.Name, crudInfo.Update.Where, dbData)
+		db, _ := dao.UpdateSql(crudInfo.Mod.Table.Name, del.Where, dbData)
 		if db == 1 {
 			rest.Code = 0
 			rest.Message = "删除成功"
