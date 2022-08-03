@@ -36,88 +36,69 @@
       "tip": "当前公司名称已经存在"
     }
   },
+  "page": {
+    "code": {
+      "select": ["id","com_name","com_desc", "flag"],
+      "from": "sys_company_t det",
+      "where": [
+        {"name": "det.com_name", "op": "like", "on": "len(det.com_name)!=0"},
+        {"name": "flag", "op": "eq", "on": "flag!=-1", "default": 0}
+      ],
+      "order": "id desc"
+    }
+  },
   "list": {
-    "select": [
-      "id",
-      "com_name",
-      "com_desc",
-      "flag"
-    ],
-    "from": "sys_company_t det",
-    "where": [
-      {
-        "name": "det.com_name",
-        "op": "like",
-        "on": "len(det.com_name)!=0"
-      },
-      {
-        "name": "flag",
-        "op": "eq",
-        "on": "flag!=-1",
-        "default": 0
-      }
-    ],
-    "order": "id desc"
+    "code": {
+      "select": ["id","com_name","com_desc", "flag"],
+      "from": "sys_company_t det",
+      "where": [
+        {"name": "det.com_name", "op": "like", "on": "len(det.com_name)!=0"},
+        {"name": "flag", "op": "eq", "on": "flag!=-1", "default": 0}
+      ],
+      "order": "id desc"
+    }
+  },
+  "get": {
+    "code": {
+      "select": ["id","com_name","com_desc", "flag"],
+      "from": "sys_company_t det",
+      "where": [
+        {"name": "det.com_name", "op": "like", "on": "len(det.com_name)!=0"},
+        {"name": "flag", "op": "eq", "on": "flag!=-1", "default": 0}
+      ],
+      "order": "id desc"
+    }
   },
   "del": {
-    "fake": false,
-    "select": [
-      "id",
-      "com_name",
-      "com_desc",
-      "flag"
-    ],
-    "where": [
-      {
-        "name": "id",
-        "op": "eq"
-      },
-      {
-        "name": "flag",
-        "op": "eq",
-        "default": 0
-      }
-    ]
+    "code": {
+      "fake": false,
+      "select": ["id", "com_name", "com_desc", "flag"],
+      "where": [
+        {"name": "id", "op": "eq"},
+        {"name": "flag", "op": "eq", "default": 0}
+      ]
+    }
   },
   "add": {
-    "columns": {
-      "com_name": {
-        "zh_name": "公司名称",
-        "dom": "input",
-        "rule": "required"
-      },
-      "com_desc": {
-        "zh_name": "备注",
-        "dom": "input"
+    "code": {
+      "columns": {
+        "com_name": {"zh_name": "公司名称", "dom": "input", "rule": "required"},
+        "com_desc": {"zh_name": "备注", "dom": "input"}
       }
     }
   },
   "update": {
-    "select": [
-      "id",
-      "com_name",
-      "com_desc",
-      "flag"
-    ],
-    "where": [
-      {
-        "name": "id",
-        "op": "eq"
-      }
-    ],
-    "columns": {
-      "com_name": {
-        "zh_name": "公司名称",
-        "dom": "input",
-        "rule": "required"
-      },
-      "com_desc": {
-        "zh_name": "备注",
-        "dom": "input"
-      },
-      "flag": {
-        "zh_name": "启用标记",
-        "dom": "input"
+    "code": {
+      "select": [
+        "id", "com_name", "com_desc", "flag"
+      ],
+      "where": [
+        {"name": "id", "op": "eq"}
+      ],
+      "columns": {
+        "com_name": {"zh_name": "公司名称", "dom": "input", "rule": "required"},
+        "com_desc": {"zh_name": "备注", "dom": "input"},
+        "flag": {"zh_name": "启用标记", "dom": "input"}
       }
     }
   }

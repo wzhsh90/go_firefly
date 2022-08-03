@@ -18,8 +18,8 @@ func (c *BaseController) Page(ctx *gin.Context) {
 		return
 	}
 	crudInfo := models.LoadCrudFile(crudJson)
-	page := crudInfo.Page[code]
-	if page.Disable {
+	page, ok := crudInfo.Page[code]
+	if !ok || page.Disable {
 		ctx.String(200, "未启用查询,请检查配置文件")
 		return
 	}
@@ -41,8 +41,8 @@ func (c *BaseController) Get(ctx *gin.Context) {
 		return
 	}
 	crudInfo := models.LoadCrudFile(crudJson)
-	get := crudInfo.Get[code]
-	if get.Disable {
+	get, ok := crudInfo.Get[code]
+	if !ok || get.Disable {
 		ctx.String(200, "未启用查询,请检查配置文件")
 		return
 	}
@@ -62,8 +62,8 @@ func (c *BaseController) List(ctx *gin.Context) {
 		return
 	}
 	crudInfo := models.LoadCrudFile(crudJson)
-	list := crudInfo.List[code]
-	if list.Disable {
+	list, ok := crudInfo.List[code]
+	if !ok || list.Disable {
 		ctx.String(200, "未启用查询,请检查配置文件")
 		return
 	}
@@ -91,8 +91,8 @@ func (c *BaseController) Add(ctx *gin.Context) {
 	var rest = models.RestResult{}
 	rest.Code = 1
 	crudInfo := models.LoadCrudFile(crudJson)
-	add := crudInfo.Add[code]
-	if add.Disable {
+	add, ok := crudInfo.Add[code]
+	if !ok || add.Disable {
 		ctx.String(200, "未启用新增,请检查配置文件")
 		return
 	}
@@ -135,8 +135,8 @@ func (c *BaseController) Update(ctx *gin.Context) {
 	var rest = models.RestResult{}
 	rest.Code = 1
 	crudInfo := models.LoadCrudFile(crudJson)
-	update := crudInfo.Update[code]
-	if update.Disable {
+	update, ok := crudInfo.Update[code]
+	if !ok || update.Disable {
 		ctx.String(200, "未启用修改,请检查配置文件")
 		return
 	}
@@ -200,8 +200,8 @@ func (c *BaseController) Del(ctx *gin.Context) {
 	var rest = models.RestResult{}
 	rest.Code = 1
 	crudInfo := models.LoadCrudFile(crudJson)
-	del := crudInfo.Del[code]
-	if del.Disable {
+	del, ok := crudInfo.Del[code]
+	if !ok || del.Disable {
 		ctx.String(200, "未启用删除,请检查配置文件")
 		return
 	}
