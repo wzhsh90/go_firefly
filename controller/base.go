@@ -12,44 +12,86 @@ var crudJson = "resource/mod/company/company.crud.json"
 type BaseController struct {
 }
 
-func (c *BaseController) List(ctx *gin.Context) {
-	sid, ok := c.existAndGet(ctx.PostForm("sid"))
+func (c *BaseController) Page(ctx *gin.Context) {
+	code, ok := c.existAndGet(ctx.PostForm("code"))
 	if ok {
 		return
 	}
 	crudInfo := models.LoadCrudFile(crudJson)
-	list := crudInfo.List[sid]
-	if list.Disable {
+	page := crudInfo.Page[code]
+	if page.Disable {
 		ctx.String(200, "未启用查询,请检查配置文件")
 		return
 	}
 	pageIndex := utils.ParseInt(ctx.PostForm("pageIndex"))
 	pageSize := utils.ParseInt(ctx.PostForm("pageSize"))
 	columMap := crudInfo.Mod.Columns
+	valid := page.UnStrictParse(columMap, ctx)
+	if !valid {
+		ctx.String(200, "数据不合法")
+		return
+	}
+	tableJson := dao.PageSql(crudInfo.Mod.Table.Name, page, pageIndex, pageSize)
+	ctx.JSON(200, tableJson)
+}
+
+func (c *BaseController) Get(ctx *gin.Context) {
+	code, ok := c.existAndGet(ctx.PostForm("code"))
+	if ok {
+		return
+	}
+	crudInfo := models.LoadCrudFile(crudJson)
+	get := crudInfo.Get[code]
+	if get.Disable {
+		ctx.String(200, "未启用查询,请检查配置文件")
+		return
+	}
+	columMap := crudInfo.Mod.Columns
+	valid := get.UnStrictParse(columMap, ctx)
+	if !valid {
+		ctx.String(200, "数据不合法")
+		return
+	}
+	tableJson := dao.GetColSql(crudInfo.Mod.Table.Name, get.Where, get.Select)
+	ctx.JSON(200, tableJson)
+}
+
+func (c *BaseController) List(ctx *gin.Context) {
+	code, ok := c.existAndGet(ctx.PostForm("code"))
+	if ok {
+		return
+	}
+	crudInfo := models.LoadCrudFile(crudJson)
+	list := crudInfo.List[code]
+	if list.Disable {
+		ctx.String(200, "未启用查询,请检查配置文件")
+		return
+	}
+	columMap := crudInfo.Mod.Columns
 	valid := list.UnStrictParse(columMap, ctx)
 	if !valid {
 		ctx.String(200, "数据不合法")
 		return
 	}
-	tableJson := dao.PageSql(crudInfo.Mod.Table.Name, list, pageIndex, pageSize)
+	tableJson := dao.ListColSql(crudInfo.Mod.Table.Name, list.Where, list.Select)
 	ctx.JSON(200, tableJson)
 }
 
-func (c *BaseController) existAndGet(sid string) (string, bool) {
-	if len(sid) <= 0 {
+func (c *BaseController) existAndGet(code string) (string, bool) {
+	if len(code) <= 0 {
 		return "未启用查询,请检查配置文件", true
 	}
-	return sid, false
+	return code, false
 }
 func (c *BaseController) Add(ctx *gin.Context) {
-	sid, ok := c.existAndGet(ctx.PostForm("sid"))
+	code, ok := c.existAndGet(ctx.PostForm("code"))
 	if ok {
 		return
 	}
 	var rest = models.RestResult{}
 	rest.Code = 1
 	crudInfo := models.LoadCrudFile(crudJson)
-	add := crudInfo.Add[sid]
+	add := crudInfo.Add[code]
 	if add.Disable {
 		ctx.String(200, "未启用新增,请检查配置文件")
 		return
@@ -86,14 +128,14 @@ func (c *BaseController) Add(ctx *gin.Context) {
 	ctx.JSON(200, rest)
 }
 func (c *BaseController) Update(ctx *gin.Context) {
-	sid, ok := c.existAndGet(ctx.PostForm("sid"))
+	code, ok := c.existAndGet(ctx.PostForm("code"))
 	if ok {
 		return
 	}
 	var rest = models.RestResult{}
 	rest.Code = 1
 	crudInfo := models.LoadCrudFile(crudJson)
-	update := crudInfo.Update[sid]
+	update := crudInfo.Update[code]
 	if update.Disable {
 		ctx.String(200, "未启用修改,请检查配置文件")
 		return
@@ -151,14 +193,14 @@ func (c *BaseController) Update(ctx *gin.Context) {
 	ctx.JSON(200, rest)
 }
 func (c *BaseController) Del(ctx *gin.Context) {
-	sid, ok := c.existAndGet(ctx.PostForm("sid"))
+	code, ok := c.existAndGet(ctx.PostForm("code"))
 	if ok {
 		return
 	}
 	var rest = models.RestResult{}
 	rest.Code = 1
 	crudInfo := models.LoadCrudFile(crudJson)
-	del := crudInfo.Del[sid]
+	del := crudInfo.Del[code]
 	if del.Disable {
 		ctx.String(200, "未启用删除,请检查配置文件")
 		return

@@ -178,8 +178,33 @@ func (c *FormAdd) checkDisable() {
 		c.Opt.Disable = true
 	}
 }
+func (c *FormGet) checkDisable() {
+	if len(c.Select) <= 0 {
+		c.Opt.Disable = true
+	} else {
+		c.whereParse()
+	}
+}
+func (c *FormPage) checkDisable() {
+	if len(c.Select) <= 0 {
+		c.Opt.Disable = true
+	} else {
+		c.whereParse()
+	}
+}
 
 type FormList struct {
+	From  string `json:"from"`
+	Order string `json:"order"`
+	FormQuery
+}
+type FormPage struct {
+	From  string `json:"from"`
+	Order string `json:"order"`
+	FormQuery
+}
+
+type FormGet struct {
 	From string `json:"from"`
 	FormQuery
 }
@@ -200,7 +225,6 @@ type FormQuery struct {
 	Opt
 	Select []string `json:"select"`
 	Where  []FormOp `json:"where"`
-	Order  string   `json:"order"`
 }
 
 func (c *FormQuery) whereParse() {

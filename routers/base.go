@@ -14,6 +14,8 @@ func init() {
 		v1 := r.Group("/company")
 		{
 			v1.POST("/list", ctl.List)
+			v1.POST("/page", ctl.Page)
+			v1.POST("/get", ctl.Get)
 			v1.POST("/add", ctl.Add)
 			v1.POST("/del", ctl.Del)
 			v1.POST("/update", ctl.Update)

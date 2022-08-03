@@ -10,6 +10,8 @@ import (
 type CurdInfo struct {
 	Mod    ModInfo               `json:"mod"`
 	List   map[string]FormList   `json:"list"`
+	Page   map[string]FormPage   `json:"page"`
+	Get    map[string]FormGet    `json:"get"`
 	Add    map[string]FormAdd    `json:"add"`
 	Update map[string]FormUpdate `json:"update"`
 	Del    map[string]FormDel    `json:"del"`
@@ -26,6 +28,12 @@ func (c *CurdInfo) checkDisable() {
 		v.checkDisable()
 	}
 	for _, v := range c.Add {
+		v.checkDisable()
+	}
+	for _, v := range c.Page {
+		v.checkDisable()
+	}
+	for _, v := range c.Get {
 		v.checkDisable()
 	}
 }

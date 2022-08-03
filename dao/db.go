@@ -52,7 +52,7 @@ func Page(table string, cond map[string]interface{}, cols []string, pageIndex, p
 	tableJsonData.Rows = list
 	return tableJsonData
 }
-func PageSql(table string, formList models.FormList, pageIndex, pageSize int) models.PageModelLay {
+func PageSql(table string, formList models.FormPage, pageIndex, pageSize int) models.PageModelLay {
 	cond := formList.Where
 	var itemsCount int64
 	sb := sqlbuilder.NewSelectBuilder()
@@ -192,6 +192,23 @@ func GetCol(table string, query map[string]interface{}, cols []string) map[strin
 }
 func GetColSql(table string, cond []models.FormOp, cols []string) map[string]interface{} {
 	info := make(map[string]interface{})
+	sb := sqlbuilder.NewSelectBuilder()
+	sb.Select(cols...).From(table)
+	if len(cond) >= 1 {
+		for _, v := range cond {
+			expFlag := v.ExpOn()
+			if !expFlag {
+				continue
+			}
+			selectWhere(sb, v)
+		}
+	}
+	getSql, sqlArgs := sb.Limit(1).Build()
+	session.Raw(getSql, sqlArgs...).Find(&info)
+	return info
+}
+func ListColSql(table string, cond []models.FormOp, cols []string) []map[string]interface{} {
+	info := make([]map[string]interface{}, 0)
 	sb := sqlbuilder.NewSelectBuilder()
 	sb.Select(cols...).From(table)
 	if len(cond) >= 1 {
