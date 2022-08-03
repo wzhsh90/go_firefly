@@ -348,27 +348,22 @@ func (c *FormOp) FormatName() {
 	}
 }
 func (c *FormOp) ExpOn() bool {
-	expFlag := false
-	if c.On != "" {
-		env := make(map[string]interface{})
-		if strings.Contains(c.Name, ".") {
-			//将plain_name 也放一次，防止条件中缺少前缀
-			env[c.PlainName] = c.Val
-			env[c.Prefix] = map[string]interface{}{
-				c.PlainName: c.Val,
-			}
-		} else {
-			env[c.PlainName] = c.Val
-		}
-		program, err := expr.Compile(c.On, expr.Env(env), expr.AsBool())
-		if err == nil {
-			output, rerr := expr.Run(program, env)
-			if rerr == nil {
-				expFlag = output.(bool)
-			}
-		}
-	} else {
-		expFlag = true
+	if c.On == "" {
+		return true
 	}
-	return expFlag
+	env := make(map[string]interface{})
+	env[c.PlainName] = c.Val
+	if c.Prefix != "" {
+		env[c.Prefix] = map[string]interface{}{
+			c.PlainName: c.Val,
+		}
+	}
+	program, err := expr.Compile(c.On, expr.Env(env), expr.AsBool())
+	if err == nil {
+		output, rerr := expr.Run(program, env)
+		if rerr == nil {
+			return output.(bool)
+		}
+	}
+	return false
 }
