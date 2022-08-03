@@ -15,7 +15,7 @@ type CurdInfo struct {
 	Del    FormDel    `json:"del"`
 }
 
-func (c *CurdInfo) IsEnable() {
+func (c *CurdInfo) checkEnable() {
 	c.Del.IsEnable()
 	c.List.IsEnable()
 	c.Add.IsEnable()
@@ -42,6 +42,6 @@ func LoadCrudFile(filePath string) CurdInfo {
 func LoadCrudByte(jsonByte []byte) CurdInfo {
 	var info CurdInfo
 	json.Unmarshal(jsonByte, &info)
-	info.IsEnable()
+	info.checkEnable()
 	return info
 }

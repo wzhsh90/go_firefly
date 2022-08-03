@@ -174,7 +174,7 @@ type FormAdd struct {
 }
 
 func (c *FormAdd) IsEnable() {
-	if c.Columns == nil {
+	if len(c.Columns) > 0 {
 		c.Opt.Disable = true
 	}
 }
@@ -185,7 +185,7 @@ type FormList struct {
 }
 
 func (c *FormList) IsEnable() {
-	if c.Select == nil {
+	if len(c.Select) > 0 {
 		c.Opt.Disable = true
 	} else {
 		c.whereParse()
@@ -303,7 +303,7 @@ type FormUpdate struct {
 }
 
 func (c *FormUpdate) IsEnable() {
-	if c.Where == nil {
+	if len(c.Where) > 0 {
 		c.Opt.Disable = true
 	} else {
 		c.whereParse()
@@ -315,7 +315,7 @@ type Opt struct {
 }
 
 func (c *FormDel) IsEnable() {
-	if c.Where == nil {
+	if len(c.Where) > 0 {
 		c.Opt.Disable = true
 	} else {
 		c.whereParse()
