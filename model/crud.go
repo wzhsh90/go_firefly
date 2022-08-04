@@ -71,7 +71,9 @@ func LoadCrudFile(name string, cache bool) (CrudInfo, bool) {
 		return CrudInfo{}, false
 	}
 	info := LoadCrudByte(data)
-	utils.SetCache(name, info)
+	if cache {
+		utils.SetCache(name, info)
+	}
 	return info, true
 }
 func LoadCrudByte(jsonByte []byte) CrudInfo {
