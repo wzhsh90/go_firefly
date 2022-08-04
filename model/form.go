@@ -40,6 +40,77 @@ type ColumnInfo struct {
 	Key      bool        `json:"key"`
 	Index    string      `json:"index"`
 }
+
+func parseDefaultVal(langType string, defVal interface{}) interface{} {
+
+	//处理json string 里面是int 但unmarshal 后为float
+	if defVal != nil {
+		if langType != "int" {
+			return defVal
+		}
+		item, ok := defVal.(float64)
+		if ok {
+			return int64(item)
+		} else {
+			return 0
+		}
+	} else {
+		if langType == "int" || langType == "float" {
+			return 0
+		} else {
+			return ""
+		}
+	}
+
+}
+func (c *ColumnInfo) getInitVal() interface{} {
+	if c.LangType == "int" || c.LangType == "float" {
+		return 0
+	} else {
+		return ""
+	}
+}
+func (c *ColumnInfo) parseDefaultVal() interface{} {
+	return parseDefaultVal(c.LangType, c.Default)
+}
+func (c *ColumnInfo) checkVal(val string) CheckColumnResp {
+
+	if c.LangType == "int" {
+		pval, per := strconv.ParseInt(val, 10, 64)
+		msg := ""
+		if per != nil {
+			pval = 0
+			msg = c.ZhName + "数据不合法"
+		}
+		return CheckColumnResp{
+			Valid:    per != nil,
+			Msg:      msg,
+			Default:  0,
+			ParseVal: pval,
+		}
+	} else if c.LangType == "float" {
+		pval, per := strconv.ParseFloat(val, 64)
+		msg := ""
+		if per != nil {
+			pval = 0
+			msg = c.ZhName + "数据不合法"
+		}
+		return CheckColumnResp{
+			Valid:    per != nil,
+			Msg:      msg,
+			Default:  0,
+			ParseVal: pval,
+		}
+	} else {
+		return CheckColumnResp{
+			Valid:    true,
+			Msg:      "",
+			Default:  "",
+			ParseVal: val,
+		}
+	}
+}
+
 type FormInfo struct {
 	Columns map[string]FormField `json:"columns"`
 }
@@ -64,12 +135,18 @@ type ValidResp struct {
 	Valid bool
 	Msg   string
 }
+type CheckColumnResp struct {
+	Valid    bool
+	Msg      string
+	Default  interface{}
+	ParseVal interface{}
+}
 
 func (c *FormInfo) GetFormData(columMap map[string]ColumnInfo, ctx *gin.Context, create bool) (map[string]interface{}, map[string]interface{}, ValidResp) {
 	formData := make(map[string]interface{})
 	dbData := make(map[string]interface{})
 	//生成form data
-	for k, formCol := range c.Columns {
+	for k, _ := range c.Columns {
 		val := ctx.PostForm(k)
 		dbCol, dbOk := columMap[k]
 		if !dbOk {
@@ -79,26 +156,14 @@ func (c *FormInfo) GetFormData(columMap map[string]ColumnInfo, ctx *gin.Context,
 			}
 		}
 		if len(val) > 0 {
-			if dbCol.LangType == "int" {
-				pval, per := strconv.ParseInt(val, 10, 64)
-				if per != nil {
-					return nil, nil, ValidResp{
-						Valid: false,
-						Msg:   formCol.ZhName + "数据不合法",
-					}
+			checkResp := dbCol.checkVal(val)
+			if !checkResp.Valid {
+				return nil, nil, ValidResp{
+					Valid: false,
+					Msg:   checkResp.Msg,
 				}
-				formData[k] = pval
-			} else if dbCol.LangType == "float" {
-				pval, per := strconv.ParseFloat(val, 64)
-				if per != nil {
-					return nil, nil, ValidResp{
-						Valid: false,
-						Msg:   formCol.ZhName + "数据不合法",
-					}
-				}
-				formData[k] = pval
 			} else {
-				formData[k] = val
+				formData[k] = checkResp.ParseVal
 			}
 		}
 
@@ -120,48 +185,28 @@ func (c *FormInfo) GetFormData(columMap map[string]ColumnInfo, ctx *gin.Context,
 			if formOk {
 				dbData[k] = formVal
 			} else {
-				if dbCol.Default != nil {
-					//处理json string 里面是int 但unmarshal 后为float
-					if dbCol.LangType == "int" {
-						titem, ok := dbCol.Default.(float64)
-						if ok {
-							dbData[k] = int64(titem)
-						} else {
-							dbData[k] = 0
-						}
-					} else {
-						dbData[k] = dbCol.Default
-					}
-				} else {
-					if dbCol.LangType == "string" {
-						dbData[k] = ""
-						if dbCol.Key {
-							dbData[k] = utils.NewId()
-						}
-					} else if dbCol.LangType == "int" || dbCol.LangType == "float" {
-						dbData[k] = 0
-					}
+				dbData[k] = dbCol.parseDefaultVal()
+				//判断是key并且值为空，则默认创建id
+				if dbCol.Key && dbCol.LangType == "string" && dbData[k] == "" {
+					dbData[k] = utils.NewId()
 				}
 			}
 		}
 	} else {
 		for k, dbCol := range columMap {
 			//去掉主键
-			if !dbCol.Key {
-				_, upOk := c.Columns[k]
-				if upOk {
-					formVal, formOk := formData[k]
-					if formOk {
-						dbData[k] = formVal
-					} else {
-						if dbCol.LangType == "string" {
-							dbData[k] = ""
-						} else if dbCol.LangType == "int" || dbCol.LangType == "float" {
-							dbData[k] = 0
-						}
-					}
-				}
-
+			if dbCol.Key {
+				continue
+			}
+			_, upOk := c.Columns[k]
+			if !upOk {
+				continue
+			}
+			formVal, formOk := formData[k]
+			if formOk {
+				dbData[k] = formVal
+			} else {
+				dbData[k] = dbCol.getInitVal()
 			}
 		}
 	}
@@ -244,37 +289,14 @@ func (c *FormQuery) UnStrictParse(columMap map[string]ColumnInfo, ctx *gin.Conte
 			return false
 		}
 		if val != "" {
-			if dbCol.LangType == "int" {
-				pval, per := strconv.ParseInt(val, 10, 64)
-				if per != nil {
-					pval = 0
-				}
-				c.Where[idx].Val = pval
-			} else if dbCol.LangType == "float" {
-				pval, per := strconv.ParseFloat(val, 64)
-				if per != nil {
-					pval = 0
-				}
-				c.Where[idx].Val = pval
+			checkResp := dbCol.checkVal(val)
+			if checkResp.Valid {
+				c.Where[idx].Val = checkResp.ParseVal
 			} else {
-				c.Where[idx].Val = val
+				c.Where[idx].Val = checkResp.Default
 			}
 		} else {
-			if item.Default != nil {
-				//处理json string 里面是int 但unmarshal 后为float
-				if dbCol.LangType == "int" {
-					titem, ok := item.Default.(float64)
-					if ok {
-						c.Where[idx].Val = int64(titem)
-					} else {
-						c.Where[idx].Val = 0
-					}
-				} else {
-					c.Where[idx].Val = item.Default
-				}
-			} else {
-				c.Where[idx].Val = ""
-			}
+			c.Where[idx].Val = item.parseDefaultVal(dbCol.LangType)
 		}
 	}
 	return true
@@ -288,34 +310,15 @@ func (c *FormQuery) StrictParse(columMap map[string]ColumnInfo, ctx *gin.Context
 			return false
 		}
 		if val != "" {
-			if dbCol.LangType == "int" {
-				pval, per := strconv.ParseInt(val, 10, 64)
-				if per != nil {
-					return false
-				}
-				c.Where[idx].Val = pval
-			} else if dbCol.LangType == "float" {
-				pval, per := strconv.ParseFloat(val, 64)
-				if per != nil {
-					return false
-				}
-				c.Where[idx].Val = pval
+			checkResp := dbCol.checkVal(val)
+			if !checkResp.Valid {
+				return false
 			} else {
-				c.Where[idx].Val = val
+				c.Where[idx].Val = checkResp.ParseVal
 			}
 		} else {
 			if item.Default != nil {
-				//处理json string 里面是int 但unmarshal 后为float
-				if dbCol.LangType == "int" {
-					titem, ok := item.Default.(float64)
-					if ok {
-						c.Where[idx].Val = int64(titem)
-					} else {
-						c.Where[idx].Val = 0
-					}
-				} else {
-					c.Where[idx].Val = item.Default
-				}
+				c.Where[idx].Val = item.parseDefaultVal(dbCol.LangType)
 			} else {
 				return false
 			}
@@ -364,6 +367,9 @@ type FormOp struct {
 	Default   interface{} `json:"default"`
 }
 
+func (c *FormOp) parseDefaultVal(langType string) interface{} {
+	return parseDefaultVal(langType, c.Default)
+}
 func (c *FormOp) FormatName() {
 	if strings.Contains(c.Name, ".") {
 		nameList := strings.Split(c.Name, ".")
