@@ -20,3 +20,6 @@ func ExistCache(key string) bool {
 	_, flag := cacheBox.Get(key)
 	return flag
 }
+func DeleteCache(key string) {
+	cacheBox.Delete(key)
+}

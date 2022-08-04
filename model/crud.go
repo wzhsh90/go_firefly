@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"firefly/utils"
 	"io/ioutil"
-	"path/filepath"
 	"strings"
 )
 
@@ -17,7 +16,7 @@ type CrudEngine struct {
 func NewCrudEngine(code string) CrudEngine {
 	codeList := strings.Split(code, ".")
 	return CrudEngine{
-		Name:    codeList[0] + ".json",
+		Name:    codeList[0],
 		Process: strings.ToLower(codeList[1]),
 		Node:    codeList[2],
 	}
@@ -54,13 +53,14 @@ func (c *CrudInfo) checkDisable() {
 	}
 }
 
+var ResourcePath = "resource/crud/"
+
 func LoadCrudFile(name string) (CrudInfo, bool) {
-	filePath := "resource/crud/" + name
+	filePath := ResourcePath + name + ".json"
 	if !utils.PathExists(filePath) {
 		return CrudInfo{}, false
 	}
-	_, fileName := filepath.Split(filePath)
-	if x, found := utils.GetCache(fileName); found {
+	if x, found := utils.GetCache(name); found {
 		return x.(CrudInfo), true
 	}
 	data, err := ioutil.ReadFile(filePath)
@@ -68,7 +68,7 @@ func LoadCrudFile(name string) (CrudInfo, bool) {
 		return CrudInfo{}, false
 	}
 	info := LoadCrudByte(data)
-	utils.SetCache(fileName, info)
+	utils.SetCache(name, info)
 	return info, true
 }
 func LoadCrudByte(jsonByte []byte) CrudInfo {
