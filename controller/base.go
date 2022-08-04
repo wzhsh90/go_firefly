@@ -75,7 +75,7 @@ func getProcess(crudInfo models.CrudInfo, ctx *gin.Context, node string) {
 		ctx.String(200, "数据不合法")
 		return
 	}
-	tableJson := dao.GetColSql(get.From, get.Where, get.Select)
+	tableJson := dao.GetColSql(get.From, get.Join, get.Where, get.Select)
 	ctx.JSON(200, tableJson)
 }
 func listProcess(crudInfo models.CrudInfo, ctx *gin.Context, node string) {
@@ -90,7 +90,7 @@ func listProcess(crudInfo models.CrudInfo, ctx *gin.Context, node string) {
 		ctx.String(200, "数据不合法")
 		return
 	}
-	tableJson := dao.ListColSql(list.From, list.Where, list.Select)
+	tableJson := dao.ListColSql(list.From, list.Join, list.Where, list.Select)
 	ctx.JSON(200, tableJson)
 }
 func addProcess(crudInfo models.CrudInfo, ctx *gin.Context, node string) {
@@ -151,7 +151,7 @@ func updateProcess(crudInfo models.CrudInfo, ctx *gin.Context, node string) {
 		rest.Message = "数据不合法"
 		ctx.JSON(200, rest)
 	}
-	orgInfo := dao.GetColSql(crudInfo.Mod.Table.Name, update.Where, update.Select)
+	orgInfo := dao.GetColSql(crudInfo.Mod.Table.Name, update.Join, update.Where, update.Select)
 	if len(orgInfo) == 0 {
 		rest.Message = "数据获取失败或已不存在"
 		ctx.JSON(200, rest)
@@ -206,7 +206,7 @@ func delProcess(crudInfo models.CrudInfo, ctx *gin.Context, node string) {
 		ctx.JSON(200, rest)
 	}
 	if len(del.Select) != 0 {
-		orgInfo := dao.GetColSql(crudInfo.Mod.Table.Name, del.Where, del.Select)
+		orgInfo := dao.GetColSql(crudInfo.Mod.Table.Name, del.Join, del.Where, del.Select)
 		if len(orgInfo) == 0 {
 			rest.Message = "数据获取失败或已不存在"
 			ctx.JSON(200, rest)

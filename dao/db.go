@@ -201,10 +201,15 @@ func GetCol(table string, query map[string]interface{}, cols []string) map[strin
 	//}
 	return info
 }
-func GetColSql(table string, cond []models.FormOp, cols []string) map[string]interface{} {
+func GetColSql(table string, joins []models.FormJoin, cond []models.FormOp, cols []string) map[string]interface{} {
 	info := make(map[string]interface{})
 	sb := sqlbuilder.NewSelectBuilder()
 	sb.Select(cols...).From(table)
+	if len(joins) >= 1 {
+		for _, join := range joins {
+			sb.JoinWithOption(sqlbuilder.JoinOption(join.Option), join.Table, join.On)
+		}
+	}
 	if len(cond) >= 1 {
 		for _, v := range cond {
 			expFlag := v.ExpOn()
@@ -218,10 +223,15 @@ func GetColSql(table string, cond []models.FormOp, cols []string) map[string]int
 	session.Raw(getSql, sqlArgs...).Find(&info)
 	return info
 }
-func ListColSql(table string, cond []models.FormOp, cols []string) []map[string]interface{} {
+func ListColSql(table string, joins []models.FormJoin, cond []models.FormOp, cols []string) []map[string]interface{} {
 	info := make([]map[string]interface{}, 0)
 	sb := sqlbuilder.NewSelectBuilder()
 	sb.Select(cols...).From(table)
+	if len(joins) >= 1 {
+		for _, join := range joins {
+			sb.JoinWithOption(sqlbuilder.JoinOption(join.Option), join.Table, join.On)
+		}
+	}
 	if len(cond) >= 1 {
 		for _, v := range cond {
 			expFlag := v.ExpOn()
