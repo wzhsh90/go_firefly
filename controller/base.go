@@ -5,20 +5,46 @@ import (
 	models "firefly/model"
 	"firefly/utils"
 	"github.com/gin-gonic/gin"
+	"strings"
 )
 
-var crudJson = "resource/mod/company/company.crud.json"
+//var crudJson = "resource/mod/company/company.crud.json"
+var processMap = map[string]func(cfg models.CrudInfo, ctx *gin.Context, node string){}
+
+func registerProcess(name string, handler func(cfg models.CrudInfo, ctx *gin.Context, node string)) {
+	name = strings.ToLower(name)
+	processMap[name] = handler
+}
+func init() {
+	registerProcess("page", pageProcess)
+	registerProcess("list", listProcess)
+	registerProcess("get", getProcess)
+	registerProcess("add", addProcess)
+	registerProcess("update", updateProcess)
+	registerProcess("del", delProcess)
+}
 
 type BaseController struct {
 }
 
-func (c *BaseController) Page(ctx *gin.Context) {
-	code, ok := c.existAndGet(ctx.PostForm("code"))
-	if ok {
+func (c *BaseController) Handler(ctx *gin.Context) {
+	code := ctx.PostForm("code")
+	engine := models.NewCrudEngine(code)
+	cfg, cfgOk := models.LoadCrudFile(engine.Name)
+	if !cfgOk {
+		ctx.String(401, "参数非法，权限不存在")
 		return
 	}
-	crudInfo := models.LoadCrudFile(crudJson)
-	page, ok := crudInfo.Page[code]
+	//处理器
+	if _, ok := models.CrudProcessTypeMap[engine.Process]; !ok {
+		ctx.String(401, "参数非法，权限不存在")
+		return
+	}
+	processMap[engine.Process](cfg, ctx, engine.Node)
+
+}
+func pageProcess(crudInfo models.CrudInfo, ctx *gin.Context, node string) {
+	page, ok := crudInfo.Page[node]
 	if !ok || page.Disable {
 		ctx.String(200, "未启用查询,请检查配置文件")
 		return
@@ -34,14 +60,8 @@ func (c *BaseController) Page(ctx *gin.Context) {
 	tableJson := dao.PageSql(crudInfo.Mod.Table.Name, page, pageIndex, pageSize)
 	ctx.JSON(200, tableJson)
 }
-
-func (c *BaseController) Get(ctx *gin.Context) {
-	code, ok := c.existAndGet(ctx.PostForm("code"))
-	if ok {
-		return
-	}
-	crudInfo := models.LoadCrudFile(crudJson)
-	get, ok := crudInfo.Get[code]
+func getProcess(crudInfo models.CrudInfo, ctx *gin.Context, node string) {
+	get, ok := crudInfo.Get[node]
 	if !ok || get.Disable {
 		ctx.String(200, "未启用查询,请检查配置文件")
 		return
@@ -55,14 +75,8 @@ func (c *BaseController) Get(ctx *gin.Context) {
 	tableJson := dao.GetColSql(crudInfo.Mod.Table.Name, get.Where, get.Select)
 	ctx.JSON(200, tableJson)
 }
-
-func (c *BaseController) List(ctx *gin.Context) {
-	code, ok := c.existAndGet(ctx.PostForm("code"))
-	if ok {
-		return
-	}
-	crudInfo := models.LoadCrudFile(crudJson)
-	list, ok := crudInfo.List[code]
+func listProcess(crudInfo models.CrudInfo, ctx *gin.Context, node string) {
+	list, ok := crudInfo.List[node]
 	if !ok || list.Disable {
 		ctx.String(200, "未启用查询,请检查配置文件")
 		return
@@ -76,28 +90,15 @@ func (c *BaseController) List(ctx *gin.Context) {
 	tableJson := dao.ListColSql(crudInfo.Mod.Table.Name, list.Where, list.Select)
 	ctx.JSON(200, tableJson)
 }
-
-func (c *BaseController) existAndGet(code string) (string, bool) {
-	if len(code) <= 0 {
-		return "未启用查询,请检查配置文件", true
-	}
-	return code, false
-}
-func (c *BaseController) Add(ctx *gin.Context) {
-	code, ok := c.existAndGet(ctx.PostForm("code"))
-	if ok {
-		return
-	}
+func addProcess(crudInfo models.CrudInfo, ctx *gin.Context, node string) {
 	var rest = models.RestResult{}
 	rest.Code = 1
-	crudInfo := models.LoadCrudFile(crudJson)
-	add, ok := crudInfo.Add[code]
+	add, ok := crudInfo.Add[node]
 	if !ok || add.Disable {
 		ctx.String(200, "未启用新增,请检查配置文件")
 		return
 	}
 	columMap := crudInfo.Mod.Columns
-
 	_, dbData, validResp := add.GetFormData(columMap, ctx, true)
 	if !validResp.Valid {
 		rest.Message = validResp.Msg
@@ -127,15 +128,10 @@ func (c *BaseController) Add(ctx *gin.Context) {
 	}
 	ctx.JSON(200, rest)
 }
-func (c *BaseController) Update(ctx *gin.Context) {
-	code, ok := c.existAndGet(ctx.PostForm("code"))
-	if ok {
-		return
-	}
+func updateProcess(crudInfo models.CrudInfo, ctx *gin.Context, node string) {
 	var rest = models.RestResult{}
 	rest.Code = 1
-	crudInfo := models.LoadCrudFile(crudJson)
-	update, ok := crudInfo.Update[code]
+	update, ok := crudInfo.Update[node]
 	if !ok || update.Disable {
 		ctx.String(200, "未启用修改,请检查配置文件")
 		return
@@ -192,15 +188,10 @@ func (c *BaseController) Update(ctx *gin.Context) {
 	}
 	ctx.JSON(200, rest)
 }
-func (c *BaseController) Del(ctx *gin.Context) {
-	code, ok := c.existAndGet(ctx.PostForm("code"))
-	if ok {
-		return
-	}
+func delProcess(crudInfo models.CrudInfo, ctx *gin.Context, node string) {
 	var rest = models.RestResult{}
 	rest.Code = 1
-	crudInfo := models.LoadCrudFile(crudJson)
-	del, ok := crudInfo.Del[code]
+	del, ok := crudInfo.Del[node]
 	if !ok || del.Disable {
 		ctx.String(200, "未启用删除,请检查配置文件")
 		return

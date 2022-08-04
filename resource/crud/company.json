@@ -37,18 +37,32 @@
     }
   },
   "page": {
-    "code": {
-      "select": ["id","com_name","com_desc", "flag"],
+    "list_name": {
+      "select": [
+        "id",
+        "com_name",
+        "com_desc",
+        "flag"
+      ],
       "from": "sys_company_t det",
       "where": [
-        {"name": "det.com_name", "op": "like", "on": "len(det.com_name)!=0"},
-        {"name": "flag", "op": "eq", "on": "flag!=-1", "default": 0}
+        {
+          "name": "det.com_name",
+          "op": "like",
+          "on": "len(det.com_name)!=0"
+        },
+        {
+          "name": "flag",
+          "op": "eq",
+          "on": "flag!=-1",
+          "default": 0
+        }
       ],
       "order": "id desc"
     }
   },
   "list": {
-    "code": {
+    "list_name": {
       "select": ["id","com_name","com_desc", "flag"],
       "from": "sys_company_t det",
       "where": [
@@ -59,7 +73,7 @@
     }
   },
   "get": {
-    "code": {
+    "list_name": {
       "select": ["id","com_name","com_desc", "flag"],
       "from": "sys_company_t det",
       "where": [
@@ -70,7 +84,7 @@
     }
   },
   "del": {
-    "code": {
+    "del_id": {
       "fake": false,
       "select": ["id", "com_name", "com_desc", "flag"],
       "where": [
@@ -80,7 +94,7 @@
     }
   },
   "add": {
-    "code": {
+    "save": {
       "columns": {
         "com_name": {"zh_name": "公司名称", "dom": "input", "rule": "required"},
         "com_desc": {"zh_name": "备注", "dom": "input"}
@@ -88,7 +102,7 @@
     }
   },
   "update": {
-    "code": {
+    "update_id": {
       "select": [
         "id", "com_name", "com_desc", "flag"
       ],

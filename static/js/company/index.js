@@ -13,8 +13,8 @@ layui.use(['form'], function () {
 layui.use(['table'], function () {
     table = layui.table;
     layAjaxTable(table, {
-        url: "/company/list",
-        where: {flag: -1},
+        url: "/curd/handler",
+        where: {flag: -1,"code":"company.page.list_name"},
         cols: [[
             {title: '序号', width: 70, templet: '#indexTpl'}
             , {field: 'com_name', title: '名称', width: 200}
@@ -40,8 +40,9 @@ layui.use(['table'], function () {
 });
 
 function ajaxUpdate(data) {
-    var url = "/company/update";
+    var url = "/curd/handler";
     data["flag"]=data["flag"]=="on"?1:0;
+    data["code"]="company.update.update_id";
     postAjax(url, data, function (res) {
         if (res["code"] == 0) {
             layer.msg(res["msg"]);
@@ -58,7 +59,8 @@ function ajaxUpdate(data) {
 
 
 function ajaxAdd(data) {
-    var url = "/company/add";
+    var url = "/curd/handler";
+    data["code"]="company.add.save";
     data["flag"]=data["flag"]=="on"?1:0;
     postAjax(url, data, function (res) {
         if (res["code"] == 0) {
@@ -79,8 +81,8 @@ function ajaxAdd(data) {
 }
 
 function ajaxDel(id, obj, index) {
-    var url = "/company/del";
-    postAjax(url, {"id": id}, function (res) {
+    var url = "/curd/handler";
+    postAjax(url, {"id": id,"code":"company.del.del_id"}, function (res) {
         if (res["code"] == 0) {
             layer.msg(res["msg"]);
             obj.del();

@@ -5,9 +5,34 @@ import (
 	"firefly/utils"
 	"io/ioutil"
 	"path/filepath"
+	"strings"
 )
 
-type CurdInfo struct {
+var CrudProcessTypeMap = map[string]bool{
+	"page":   true,
+	"list":   true,
+	"get":    true,
+	"add":    true,
+	"update": true,
+	"del":    true,
+}
+
+type CrudEngine struct {
+	Name    string
+	Process string
+	Node    string
+}
+
+func NewCrudEngine(code string) CrudEngine {
+	codeList := strings.Split(code, ".")
+	return CrudEngine{
+		Name:    codeList[0] + ".json",
+		Process: strings.ToLower(codeList[1]),
+		Node:    codeList[2],
+	}
+}
+
+type CrudInfo struct {
 	Mod    ModInfo               `json:"mod"`
 	List   map[string]FormList   `json:"list"`
 	Page   map[string]FormPage   `json:"page"`
@@ -17,7 +42,7 @@ type CurdInfo struct {
 	Del    map[string]FormDel    `json:"del"`
 }
 
-func (c *CurdInfo) checkDisable() {
+func (c *CrudInfo) checkDisable() {
 	for _, v := range c.Update {
 		v.checkDisable()
 	}
@@ -38,24 +63,25 @@ func (c *CurdInfo) checkDisable() {
 	}
 }
 
-func LoadCrudFile(filePath string) CurdInfo {
+func LoadCrudFile(name string) (CrudInfo, bool) {
+	filePath := "resource/crud/" + name
 	if !utils.PathExists(filePath) {
-		return CurdInfo{}
+		return CrudInfo{}, false
 	}
 	_, fileName := filepath.Split(filePath)
 	if x, found := utils.GetCache(fileName); found {
-		return x.(CurdInfo)
+		return x.(CrudInfo), true
 	}
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		return CurdInfo{}
+		return CrudInfo{}, false
 	}
 	info := LoadCrudByte(data)
 	utils.SetCache(fileName, info)
-	return info
+	return info, true
 }
-func LoadCrudByte(jsonByte []byte) CurdInfo {
-	var info CurdInfo
+func LoadCrudByte(jsonByte []byte) CrudInfo {
+	var info CrudInfo
 	json.Unmarshal(jsonByte, &info)
 	info.checkDisable()
 	return info
