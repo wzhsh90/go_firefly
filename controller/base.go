@@ -36,11 +36,12 @@ func (c *BaseController) Handler(ctx *gin.Context) {
 		return
 	}
 	//处理器
-	if _, ok := models.CrudProcessTypeMap[engine.Process]; !ok {
+	if processFn, ok := processMap[engine.Process]; ok {
+		processFn(cfg, ctx, engine.Node)
+	} else {
 		ctx.String(401, "参数非法，权限不存在")
 		return
 	}
-	processMap[engine.Process](cfg, ctx, engine.Node)
 
 }
 func pageProcess(crudInfo models.CrudInfo, ctx *gin.Context, node string) {

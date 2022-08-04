@@ -8,15 +8,6 @@ import (
 	"strings"
 )
 
-var CrudProcessTypeMap = map[string]bool{
-	"page":   true,
-	"list":   true,
-	"get":    true,
-	"add":    true,
-	"update": true,
-	"del":    true,
-}
-
 type CrudEngine struct {
 	Name    string
 	Process string
