@@ -83,7 +83,7 @@ func (c *ColumnInfo) checkVal(val string) CheckColumnResp {
 			msg = c.ZhName + "数据不合法"
 		}
 		return CheckColumnResp{
-			Valid:    per != nil,
+			Valid:    per == nil,
 			Msg:      msg,
 			Default:  0,
 			ParseVal: pval,
@@ -96,7 +96,7 @@ func (c *ColumnInfo) checkVal(val string) CheckColumnResp {
 			msg = c.ZhName + "数据不合法"
 		}
 		return CheckColumnResp{
-			Valid:    per != nil,
+			Valid:    per == nil,
 			Msg:      msg,
 			Default:  0,
 			ParseVal: pval,
