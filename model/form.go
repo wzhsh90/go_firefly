@@ -271,8 +271,14 @@ type FormDel struct {
 }
 type FormQuery struct {
 	Opt
-	Select []string `json:"select"`
-	Where  []FormOp `json:"where"`
+	Select []string   `json:"select"`
+	Where  []FormOp   `json:"where"`
+	Join   []FormJoin `json:"join"`
+}
+type FormJoin struct {
+	Option string
+	Table  string
+	On     string
 }
 
 func (c *FormQuery) whereParse() {

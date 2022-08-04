@@ -54,11 +54,19 @@ func Page(table string, cond map[string]interface{}, cols []string, pageIndex, p
 }
 func PageSql(table string, formList models.FormPage, pageIndex, pageSize int) models.PageModelLay {
 	cond := formList.Where
+	joins := formList.Join
 	var itemsCount int64
 	sb := sqlbuilder.NewSelectBuilder()
 	sb.Select("count(*)").From(table)
+	if len(joins) >= 1 {
+		for _, join := range joins {
+			sb.JoinWithOption(sqlbuilder.JoinOption(join.Option), join.Table, join.On)
+		}
+	}
+
 	if len(cond) >= 1 {
 		for _, v := range cond {
+
 			expFlag := v.ExpOn()
 			if !expFlag {
 				continue

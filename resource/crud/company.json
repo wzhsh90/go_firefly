@@ -35,8 +35,15 @@
   },
   "page": {
     "list_name": {
-      "select": ["id", "com_name", "com_desc", "flag"],
+      "select": ["det.id","stu.name","com_name","com_desc", "flag"],
       "from": "sys_company_t det",
+      "join": [
+        {
+          "option": "inner",
+          "table": "stu_t stu",
+          "on": "stu.id=det.id"
+        }
+      ],
       "where": [
         {
           "name": "det.com_name",
@@ -50,13 +57,20 @@
           "default": 0
         }
       ],
-      "order": "id desc"
+      "order": "det.id desc"
     }
   },
   "list": {
     "list_name": {
-      "select": ["id","com_name","com_desc", "flag"],
+      "select": ["det.id","stu.id","com_name","com_desc", "flag"],
       "from": "sys_company_t det",
+      "join": [
+        {
+        "option": "left join",
+        "table": "stu_t stu",
+        "on": "stu.id=det.id"
+        }
+      ],
       "where": [
         {"name": "det.com_name", "op": "like", "on": "len(det.com_name)!=0"},
         {"name": "flag", "op": "eq", "on": "flag!=-1", "default": 0}
