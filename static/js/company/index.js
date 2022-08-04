@@ -13,7 +13,7 @@ layui.use(['form'], function () {
 layui.use(['table'], function () {
     table = layui.table;
     layAjaxTable(table, {
-        url: "/curd/handler",
+        url: "/crud/handler",
         where: {flag: -1,"code":"company.page.list_name"},
         cols: [[
             {title: '序号', width: 70, templet: '#indexTpl'}
@@ -40,7 +40,7 @@ layui.use(['table'], function () {
 });
 
 function ajaxUpdate(data) {
-    var url = "/curd/handler";
+    var url = "/crud/handler";
     data["flag"]=data["flag"]=="on"?1:0;
     data["code"]="company.update.update_id";
     postAjax(url, data, function (res) {
@@ -59,7 +59,7 @@ function ajaxUpdate(data) {
 
 
 function ajaxAdd(data) {
-    var url = "/curd/handler";
+    var url = "/crud/handler";
     data["code"]="company.add.save";
     data["flag"]=data["flag"]=="on"?1:0;
     postAjax(url, data, function (res) {
@@ -81,7 +81,7 @@ function ajaxAdd(data) {
 }
 
 function ajaxDel(id, obj, index) {
-    var url = "/curd/handler";
+    var url = "/crud/handler";
     postAjax(url, {"id": id,"code":"company.del.del_id"}, function (res) {
         if (res["code"] == 0) {
             layer.msg(res["msg"]);
