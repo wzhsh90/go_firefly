@@ -56,9 +56,6 @@ func PageSql(table string, formList models.FormPage, pageIndex, pageSize int) mo
 	cond := formList.Where
 	var itemsCount int64
 	sb := sqlbuilder.NewSelectBuilder()
-	if formList.From != "" {
-		table = formList.From
-	}
 	sb.Select("count(*)").From(table)
 	if len(cond) >= 1 {
 		for _, v := range cond {
@@ -102,6 +99,8 @@ func selectWhere(sb *sqlbuilder.SelectBuilder, v models.FormOp) {
 		sb.Where(sb.LE(v.Name, v.Val))
 	} else if v.Op == "lt" {
 		sb.Where(sb.L(v.Name, v.Val))
+	} else if v.Op == "in" {
+		sb.Where(sb.In(v.Name, v.Val))
 	}
 }
 func delWhere(sb *sqlbuilder.DeleteBuilder, v models.FormOp) {
@@ -121,6 +120,8 @@ func delWhere(sb *sqlbuilder.DeleteBuilder, v models.FormOp) {
 		sb.Where(sb.LE(v.Name, v.Val))
 	} else if v.Op == "lt" {
 		sb.Where(sb.L(v.Name, v.Val))
+	} else if v.Op == "in" {
+		sb.Where(sb.In(v.Name, v.Val))
 	}
 }
 func updateWhere(sb *sqlbuilder.UpdateBuilder, v models.FormOp) {
@@ -140,6 +141,8 @@ func updateWhere(sb *sqlbuilder.UpdateBuilder, v models.FormOp) {
 		sb.Where(sb.LE(v.Name, v.Val))
 	} else if v.Op == "lt" {
 		sb.Where(sb.L(v.Name, v.Val))
+	} else if v.Op == "in" {
+		sb.Where(sb.In(v.Name, v.Val))
 	}
 }
 func PageStruct(table string, cond map[string]interface{}, cols []string, listPtr interface{}, pageIndex, pageSize int) models.PageModelLay {

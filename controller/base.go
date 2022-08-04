@@ -58,7 +58,7 @@ func pageProcess(crudInfo models.CrudInfo, ctx *gin.Context, node string) {
 		ctx.String(200, "数据不合法")
 		return
 	}
-	tableJson := dao.PageSql(crudInfo.Mod.Table.Name, page, pageIndex, pageSize)
+	tableJson := dao.PageSql(page.From, page, pageIndex, pageSize)
 	ctx.JSON(200, tableJson)
 }
 func getProcess(crudInfo models.CrudInfo, ctx *gin.Context, node string) {
@@ -73,7 +73,7 @@ func getProcess(crudInfo models.CrudInfo, ctx *gin.Context, node string) {
 		ctx.String(200, "数据不合法")
 		return
 	}
-	tableJson := dao.GetColSql(crudInfo.Mod.Table.Name, get.Where, get.Select)
+	tableJson := dao.GetColSql(get.From, get.Where, get.Select)
 	ctx.JSON(200, tableJson)
 }
 func listProcess(crudInfo models.CrudInfo, ctx *gin.Context, node string) {
@@ -88,7 +88,7 @@ func listProcess(crudInfo models.CrudInfo, ctx *gin.Context, node string) {
 		ctx.String(200, "数据不合法")
 		return
 	}
-	tableJson := dao.ListColSql(crudInfo.Mod.Table.Name, list.Where, list.Select)
+	tableJson := dao.ListColSql(list.From, list.Where, list.Select)
 	ctx.JSON(200, tableJson)
 }
 func addProcess(crudInfo models.CrudInfo, ctx *gin.Context, node string) {

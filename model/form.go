@@ -78,27 +78,30 @@ func (c *FormInfo) GetFormData(columMap map[string]ColumnInfo, ctx *gin.Context,
 				Msg:   "数据不合法,存在未定义字段" + k,
 			}
 		}
-		if dbCol.LangType == "int" {
-			pval, per := strconv.ParseInt(val, 10, 64)
-			if per != nil {
-				return nil, nil, ValidResp{
-					Valid: false,
-					Msg:   formCol.ZhName + "数据不合法",
+		if len(val) > 0 {
+			if dbCol.LangType == "int" {
+				pval, per := strconv.ParseInt(val, 10, 64)
+				if per != nil {
+					return nil, nil, ValidResp{
+						Valid: false,
+						Msg:   formCol.ZhName + "数据不合法",
+					}
 				}
-			}
-			formData[k] = pval
-		} else if dbCol.LangType == "float" {
-			pval, per := strconv.ParseFloat(val, 64)
-			if per != nil {
-				return nil, nil, ValidResp{
-					Valid: false,
-					Msg:   formCol.ZhName + "数据不合法",
+				formData[k] = pval
+			} else if dbCol.LangType == "float" {
+				pval, per := strconv.ParseFloat(val, 64)
+				if per != nil {
+					return nil, nil, ValidResp{
+						Valid: false,
+						Msg:   formCol.ZhName + "数据不合法",
+					}
 				}
+				formData[k] = pval
+			} else {
+				formData[k] = val
 			}
-			formData[k] = pval
-		} else {
-			formData[k] = val
 		}
+
 	}
 	//检验form 上传是否合法
 	rules := c.GetRules()
