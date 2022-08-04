@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"firefly/config"
 	"firefly/dao"
 	models "firefly/model"
 	"firefly/utils"
@@ -30,7 +31,8 @@ type BaseController struct {
 func (c *BaseController) Handler(ctx *gin.Context) {
 	code := ctx.PostForm("code")
 	engine := models.NewCrudEngine(code)
-	cfg, cfgOk := models.LoadCrudFile(engine.Name)
+	server := config.GetAppConfig().Server
+	cfg, cfgOk := models.LoadCrudFile(engine.Name, server.Prod())
 	if !cfgOk {
 		ctx.String(401, "参数非法，权限不存在")
 		return

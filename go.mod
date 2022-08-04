@@ -7,7 +7,9 @@ replace github.com/firefly => ./
 require (
 	github.com/antonmedv/expr v1.9.0
 	github.com/asaskevich/EventBus v0.0.0-20180315140547-d46933a94f05
+	github.com/fatih/color v1.13.0
 	github.com/foolin/goview v0.3.0
+	github.com/fsnotify/fsnotify v1.5.4
 	github.com/gin-contrib/cors v1.3.0
 	github.com/gin-contrib/sessions v0.0.3
 	github.com/gin-gonic/gin v1.8.1
@@ -19,7 +21,6 @@ require (
 	go.uber.org/multierr v1.5.0 // indirect
 	go.uber.org/zap v1.13.0
 	golang.org/x/crypto v0.0.0-20220307211146-efcb8507fb70 // indirect
-	golang.org/x/sys v0.0.0-20211210111614-af8b64212486 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.0.0-20200103221440-774c71fcf114 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect

@@ -15,14 +15,14 @@ var bootConfig models.BootConfig
 func init() {
 	envParam := flag.String("env", "dev", "go run main.go --env dev/prod")
 	flag.Parse()
-	var configName = ""
+	var profile = ""
 	if *envParam != "" {
-		configName = *envParam
+		profile = *envParam
 		if *envParam != "dev" && *envParam != "prod" {
-			configName = "dev"
+			profile = "dev"
 		}
 	}
-	data, cerr := ioutil.ReadFile("resource/" + configName + ".yml")
+	data, cerr := ioutil.ReadFile("resource/" + profile + ".yml")
 	if cerr != nil {
 		log.Fatal("配置文件不存在")
 	}

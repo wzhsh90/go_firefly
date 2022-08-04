@@ -7,10 +7,16 @@ type BootConfig struct {
 type Server struct {
 	Mode        string
 	Port        string
+	Profile     string
 	SessionName string
 	SessionKey  string
 	TplPath     string
 }
+
+func (c *Server) Prod() bool {
+	return c.Profile == "prod"
+}
+
 type DataSource struct {
 	Url       string
 	MaxLife   int

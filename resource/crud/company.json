@@ -1,10 +1,7 @@
 {
   "mod": {
     "name": "company",
-    "table": {
-      "name": "sys_company_t",
-      "zh_name": "公司信息"
-    },
+    "table": {"name": "sys_company_t", "zh_name": "公司信息"},
     "columns": {
       "id": {
         "zh_name": "Id",
@@ -38,12 +35,7 @@
   },
   "page": {
     "list_name": {
-      "select": [
-        "id",
-        "com_name",
-        "com_desc",
-        "flag"
-      ],
+      "select": ["id", "com_name", "com_desc", "flag"],
       "from": "sys_company_t det",
       "where": [
         {

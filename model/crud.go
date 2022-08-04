@@ -55,14 +55,17 @@ func (c *CrudInfo) checkDisable() {
 
 var ResourcePath = "resource/crud/"
 
-func LoadCrudFile(name string) (CrudInfo, bool) {
+func LoadCrudFile(name string, cache bool) (CrudInfo, bool) {
 	filePath := ResourcePath + name + ".json"
 	if !utils.PathExists(filePath) {
 		return CrudInfo{}, false
 	}
-	if x, found := utils.GetCache(name); found {
-		return x.(CrudInfo), true
+	if cache {
+		if x, found := utils.GetCache(name); found {
+			return x.(CrudInfo), true
+		}
 	}
+
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return CrudInfo{}, false
